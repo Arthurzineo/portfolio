@@ -14,13 +14,15 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "Arthur Gonçalves | Security Engineering & AI Security",
-  description: "Portfólio de Arthur Gonçalves: Security Engineering, AI Security, automação, SIEM, EDR e pesquisa aplicada.",
+  description:
+    "Portfólio de Arthur Gonçalves: Security Engineering, AI Security, automação, SIEM, EDR e pesquisa aplicada.",
   other: {
     "codex-preview": "development",
   },
   icons: {
-    icon: "/favicon.svg",
-    shortcut: "/favicon.svg",
+    icon: "/icon.png?v=2",
+    shortcut: "/icon.png?v=2",
+    apple: "/icon.png?v=2",
   },
 };
 
