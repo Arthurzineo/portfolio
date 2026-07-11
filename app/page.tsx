@@ -16,7 +16,7 @@ const copy = {
       projects: "Ver projetos",
       experience: "Ver experiência",
       signals: ["Detecção & Automação", "SIEM & EDR", "IA aplicada à segurança"],
-      status: "disponível para novos desafios",
+      status: "Security is a process, not a product.",
     },
     sections: {
       projects: {
@@ -147,7 +147,7 @@ const copy = {
       projects: "View projects",
       experience: "View experience",
       signals: ["Detection & Automation", "SIEM & EDR", "AI applied to security"],
-      status: "open to new challenges",
+      status: "Security is a process, not a product.",
     },
     sections: {
       projects: {
