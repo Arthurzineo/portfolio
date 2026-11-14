@@ -3,7 +3,7 @@ import type { Lang } from "./portfolio";
 /** Interface strings. Content lives in portfolio.ts; this is only chrome. */
 export const ui = {
   pt: {
-    brand: "Synapse OS",
+    brand: "Dr4g0nR00t",
     search: "Buscar projetos, tecnologias e seções",
     searchShort: "Buscar",
     neural: "Neural",
@@ -55,7 +55,7 @@ export const ui = {
     focusIntro: "Tudo o que está no universo neural, em uma página só.",
   },
   en: {
-    brand: "Synapse OS",
+    brand: "Dr4g0nR00t",
     search: "Search projects, technologies, and sections",
     searchShort: "Search",
     neural: "Neural",

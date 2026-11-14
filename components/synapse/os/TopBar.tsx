@@ -1,5 +1,6 @@
 "use client";
 
+import DecryptedText from "@/components/reactbits/DecryptedText";
 import type { Lang } from "@/content/portfolio";
 import type { UI } from "@/content/ui";
 import { setLang, type Mode } from "@/lib/stores";
@@ -17,7 +18,10 @@ export function TopBar({ lang, t, mode, canNeural, onMode, onHome, onSearch }: P
           <circle cx="17.1" cy="14.1" r="1.2" fill="currentColor" />
           <circle cx="2.9" cy="14.1" r="1.2" fill="currentColor" />
         </svg>
-        <span>{t.brand}</span>
+        {/* The handle decrypts once on load and again on hover. */}
+        <span className="brand-name">
+          <DecryptedText text={t.brand} animateOn="inViewHover" sequential revealDirection="start" speed={45} maxIterations={14} characters="01<>/\\#$%&@?" />
+        </span>
       </button>
 
       <button type="button" className="search" onClick={onSearch} aria-keyshortcuts="Control+K Meta+K">

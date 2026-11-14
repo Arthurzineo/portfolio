@@ -985,7 +985,7 @@ dialog[open] > div {
     gap: 8px;
     background: var(--obsidian);
   }
-  .brand span,
+  .brand-name,
   .search-long,
   kbd {
     display: none;
