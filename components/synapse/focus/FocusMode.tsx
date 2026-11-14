@@ -7,7 +7,7 @@
  */
 import { areaById, courses, profile, projects, type Lang } from "@/content/portfolio";
 import type { UI } from "@/content/ui";
-import { CareerAxis, CertList, Education, ProjectGallery, ResearchBlock, RoleList, Tags, type OpenImage } from "../content/blocks";
+import { CareerAxis, CertList, Decrypted, Education, ProjectGallery, ResearchBlock, RoleList, Tags, type OpenImage } from "../content/blocks";
 
 type Props = { lang: Lang; t: UI; webgl: boolean; hydrated: boolean; onOpenImage: OpenImage };
 
@@ -47,7 +47,9 @@ export function FocusMode({ lang, t, webgl, hydrated, onOpenImage }: Props) {
             <article key={project.id} id={project.id}>
               <div>
                 <h3>{project.title}</h3>
-                <p>{project.description[lang]}</p>
+                <p>
+                  <Decrypted text={project.description[lang]} />
+                </p>
                 {project.note ? <p className="quiet">{project.note[lang]}</p> : null}
                 <Tags tags={project.tags} label={t.technologies} />
                 <ul className="reasons">

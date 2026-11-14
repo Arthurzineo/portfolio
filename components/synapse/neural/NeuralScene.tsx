@@ -23,6 +23,8 @@ export type NeuralSceneProps = {
   /** Fraction of the viewport height the scene shifts up. */
   lift: number;
   labels: RefObject<Map<NodeId, HTMLElement>>;
+  /** Called once if the device cannot hold the frame rate, so the shell can drop its decorative layers too. */
+  onSlow?: () => void;
 };
 
 type Quality = "high" | "low";
@@ -386,7 +388,11 @@ export default function NeuralScene(props: NeuralSceneProps) {
       gl={{ antialias: false, alpha: true, powerPreference: "high-performance" }}
       aria-hidden="true"
     >
-      <Rig selection={selection} reduced={reduced} shift={props.shift} lift={props.lift} labels={props.labels} glow={glow} clockRef={clock} onSlow={() => setQuality("low")} />
+      <Rig selection={selection} reduced={reduced} shift={props.shift} lift={props.lift} labels={props.labels} glow={glow} clockRef={clock} onSlow={() => {
+          setQuality("low");
+          props.onSlow?.();
+        }}
+      />
       <Backdrop levels={levels} glow={glow} shared={shared} />
       <Dust shared={shared} />
       <Burst shared={shared}>

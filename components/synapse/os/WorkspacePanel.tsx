@@ -3,7 +3,10 @@
 import { itemById, items, neighbors, nodeById, nodeOf, type ItemId, type NodeId, type Selection } from "@/content/graph";
 import { areaById, profile, projectById, projects, type AreaId, type Lang, type ProjectId } from "@/content/portfolio";
 import type { UI } from "@/content/ui";
-import { CareerAxis, CertList, Education, ProjectGallery, ResearchBlock, RoleList, Tags, type OpenImage } from "../content/blocks";
+import { lazy, Suspense } from "react";
+import { CareerAxis, CertList, CertStatus, Decrypted, Education, ProjectGallery, ResearchBlock, RoleList, Tags, type OpenImage } from "../content/blocks";
+
+const Radar = lazy(() => import("@/components/reactbits/Radar"));
 
 type Props = { selection: Selection; lang: Lang; t: UI; onSelect: (s: Selection) => void; onOpenImage: OpenImage };
 
@@ -57,6 +60,14 @@ function AreaContent({ id, ...rest }: { id: AreaId } & Omit<Props, "selection">)
   const area = areaById[id];
   return (
     <>
+      {id === "security" ? (
+        // Decorative sweep for the detection area. It shows no data and is hidden from assistive tech.
+        <div className="panel-radar" aria-hidden="true">
+          <Suspense fallback={null}>
+            <Radar color="#64E4DC" backgroundColor="#0a0f17" speed={0.7} scale={1.7} brightness={1.4} intro={false} ringCount={4} targets={5} clutter={0.2} glow={0.5} gridOpacity={0.5} mouseInteraction={false} />
+          </Suspense>
+        </div>
+      ) : null}
       <h2>{area.name}</h2>
       <p className="lede">{area.summary[lang]}</p>
       {id === "projects" ? (
@@ -92,7 +103,9 @@ function ProjectContent({ id, lang, t, onSelect, onOpenImage }: { id: ProjectId 
   return (
     <>
       <h2>{project.title}</h2>
-      <p className="lede">{project.description[lang]}</p>
+      <p className="lede">
+        <Decrypted text={project.description[lang]} />
+      </p>
       {project.note ? <p className="quiet">{project.note[lang]}</p> : null}
       <Tags tags={project.tags} label={t.technologies} />
       <ProjectGallery project={project} lang={lang} t={t} onOpen={onOpenImage} />
@@ -110,7 +123,7 @@ function ItemContent({ id, lang, t, onSelect }: { id: ItemId } & Omit<Props, "se
       <p className="lede">{item.detail[lang]}</p>
       {item.status ? (
         <p data-status={item.status}>
-          <span className="cert-status">{item.status === "done" ? t.done : t.progress}</span>
+          <CertStatus status={item.status} t={t} />
         </p>
       ) : null}
       <Connections id={id} lang={lang} t={t} onSelect={onSelect} only="project" />

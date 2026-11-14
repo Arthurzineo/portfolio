@@ -237,6 +237,19 @@ kbd {
   overflow: hidden;
   background: radial-gradient(58% 52% at 50% 46%, #0f1826 0%, var(--obsidian) 72%);
 }
+/* Animated ASCII field behind the scene. Masked toward the centre so it frames the graph instead of fighting it. */
+.stage-ascii {
+  position: absolute;
+  inset: 0;
+  opacity: 0.5;
+  mask-image: radial-gradient(75% 70% at 55% 45%, rgb(0 0 0 / 0.25) 0%, #000 100%);
+  animation: fade-in 1.6s 1.2s var(--ease) both;
+}
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+}
 .stage-canvas {
   position: absolute;
   inset: 0;
@@ -318,6 +331,21 @@ kbd {
 }
 .hero h1 {
   font-size: clamp(2.25rem, 3.9vw, 3.75rem);
+}
+/* When the ASCII rendering is on, the real heading stays in the DOM for assistive tech and reserves the space. */
+.hero h1[data-ascii="true"] {
+  color: transparent;
+}
+.hero > div {
+  position: relative;
+}
+.hero-ascii {
+  position: absolute;
+  left: -28px;
+  top: -64px;
+  width: min(700px, 50vw);
+  height: calc(clamp(2.25rem, 3.9vw, 3.75rem) + 128px);
+  pointer-events: none;
 }
 .hero-role {
   margin-top: 10px;
@@ -627,6 +655,44 @@ kbd {
 }
 .education p {
   margin-top: 2px;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+.fuzzy {
+  display: inline-flex;
+}
+.panel-radar {
+  flex: none;
+  height: 168px;
+  margin: -6px -8px 0;
+  border-radius: 4px;
+  overflow: hidden;
+}
+.curtain {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  background: var(--obsidian);
+  animation: curtain linear both;
+}
+@keyframes curtain {
+  0% {
+    opacity: 0;
+  }
+  30%,
+  60% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
 }
 
 /* ------------------------------------------------------------------ dialogs */

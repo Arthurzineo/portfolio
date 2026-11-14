@@ -2,11 +2,11 @@
 
 import type { Lang } from "@/content/portfolio";
 import type { UI } from "@/content/ui";
-import { setLang, setMode, type Mode } from "@/lib/stores";
+import { setLang, type Mode } from "@/lib/stores";
 
-type Props = { lang: Lang; t: UI; mode: Mode; canNeural: boolean; onHome: () => void; onSearch: () => void };
+type Props = { lang: Lang; t: UI; mode: Mode; canNeural: boolean; onMode: (mode: Mode) => void; onHome: () => void; onSearch: () => void };
 
-export function TopBar({ lang, t, mode, canNeural, onHome, onSearch }: Props) {
+export function TopBar({ lang, t, mode, canNeural, onMode, onHome, onSearch }: Props) {
   return (
     <header className="topbar">
       <button type="button" className="brand" onClick={onHome} aria-label={`${t.brand}: ${t.home}`}>
@@ -37,11 +37,11 @@ export function TopBar({ lang, t, mode, canNeural, onHome, onSearch }: Props) {
             aria-pressed={mode === "neural"}
             disabled={!canNeural}
             title={canNeural ? undefined : t.noWebgl}
-            onClick={() => setMode("neural")}
+            onClick={() => onMode("neural")}
           >
             {t.neural}
           </button>
-          <button type="button" aria-pressed={mode === "focus"} onClick={() => setMode("focus")}>
+          <button type="button" aria-pressed={mode === "focus"} onClick={() => onMode("focus")}>
             {t.focus}
           </button>
         </div>

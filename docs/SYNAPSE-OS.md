@@ -48,7 +48,16 @@ post-processing (glow comes from additive point density).
 
 ## References consulted
 
-- React Bits (MIT + Commons Clause): read `WebThreads`, `Particles`, `Orb` for shader technique. No code copied.
+- React Bits (MIT + Commons Clause, commit `cf28010`): six components vendored in `components/reactbits/`
+  with the licence file. They have no dependencies of their own. Only local change: `DecryptedText` renders a
+  plain `span` instead of `motion.span`, so the `motion` package is not needed.
+  - `GradientASCII`: animated field behind the neural scene (masked, 50% opacity).
+  - `ASCIIText`: the name in the neural hero. The real `h1` stays in the DOM for assistive tech and SSR.
+  - `Radar`: decorative sweep at the top of the Security Engineering panel. Shows no data.
+  - `LetterGlitch`: 620 ms curtain when switching between Neural and Focus.
+  - `FuzzyText`: the "in progress" certification status.
+  - `DecryptedText`: project summaries, once, when they enter the view.
+  These layers are off on small screens, with reduced motion, and after the scene reports a low frame rate.
 - transitions.dev: duration and easing tokens (`--dur-*`, `--ease`) and the panel/modal patterns in `globals.css`.
 - Taste Skill (MIT) and Anthropic frontend-design: read as art-direction checklists. No installer was run.
 

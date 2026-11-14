@@ -4,6 +4,8 @@
  * Presentational blocks shared by the workspace panel and Focus Mode, so both
  * modes show exactly the same information from content/portfolio.ts.
  */
+import DecryptedText from "@/components/reactbits/DecryptedText";
+import FuzzyText from "@/components/reactbits/FuzzyText";
 import { certifications, education, experience, research, type Lang, type Project } from "@/content/portfolio";
 import type { UI } from "@/content/ui";
 
@@ -89,6 +91,26 @@ export function Education({ lang, t }: { lang: Lang; t: UI }) {
   );
 }
 
+/** A project summary that resolves from scrambled characters the first time it scrolls into view. */
+export function Decrypted({ text }: { text: string }) {
+  return <DecryptedText text={text} animateOn="view" sequential revealDirection="start" speed={14} maxIterations={8} useOriginalCharsOnly />;
+}
+
+/** "In progress" is drawn fuzzy on purpose: it is not settled yet. Completed stays crisp. */
+export function CertStatus({ status, t }: { status: "done" | "progress"; t: UI }) {
+  if (status === "done") return <span className="cert-status">{t.done}</span>;
+  return (
+    <span className="cert-status">
+      <span className="sr-only">{t.progress}</span>
+      <span aria-hidden="true" className="fuzzy">
+        <FuzzyText fontSize={13} fontWeight={500} fontFamily="'Archivo Variable', sans-serif" color="#9dadbf" baseIntensity={0.16} hoverIntensity={0.45} fuzzRange={6} fps={30}>
+          {t.progress}
+        </FuzzyText>
+      </span>
+    </span>
+  );
+}
+
 export function CertList({ t }: { t: UI }) {
   return (
     <ul className="certs">
@@ -98,7 +120,7 @@ export function CertList({ t }: { t: UI }) {
             <h3>{cert.name}</h3>
             <p>{cert.detail}</p>
           </div>
-          <span className="cert-status">{cert.status === "done" ? t.done : t.progress}</span>
+          <CertStatus status={cert.status} t={t} />
         </li>
       ))}
     </ul>
