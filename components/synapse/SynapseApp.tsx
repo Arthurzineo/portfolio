@@ -72,6 +72,8 @@ export default function SynapseApp() {
   // Fetch the curtain ahead of time so the first mode switch is not an empty frame.
   useEffect(() => {
     void import("@/components/reactbits/LetterGlitch");
+    // Same for the carousel, so the first image click opens it directly.
+    void import("@/components/reactbits/CircularGallery");
   }, []);
 
   useEffect(() => {

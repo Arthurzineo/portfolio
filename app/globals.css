@@ -907,8 +907,9 @@ dialog[open] > div {
 .cert-badge {
   position: absolute;
   left: 50%;
-  top: 34%;
-  width: 42%;
+  top: 38%;
+  width: 46%;
+  opacity: 0.95;
   transform: translate(-50%, -50%);
   pointer-events: none;
 }

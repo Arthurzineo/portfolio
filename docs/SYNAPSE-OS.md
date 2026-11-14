@@ -68,6 +68,13 @@ post-processing (glow comes from additive point density).
 - transitions.dev: duration and easing tokens (`--dur-*`, `--ease`) and the panel/modal patterns in `globals.css`.
 - Taste Skill (MIT) and Anthropic frontend-design: read as art-direction checklists. No installer was run.
 
+## Third-party marks
+
+`public/badges/comptia.svg` is the CompTIA mark from the `simple-icons` package (v16.37.0, CC0 for the
+collection; the mark itself remains a CompTIA trademark), recoloured white. It appears only on completed
+CompTIA certifications. Sophos has no mark in that package; add an official file as `public/badges/sophos.*`
+and register it in `ISSUER_LOGO` in `content/portfolio.ts`.
+
 ## Images
 
 `public/portrait/*.webp` were supplied by the owner and converted from PNG to WebP (960 px wide, quality 82).

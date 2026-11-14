@@ -63,7 +63,7 @@ export function Lightbox({ project, start, lang, t, onClose }: Props) {
         {carousel ? (
           <>
             <div className="lightbox-carousel">
-              <Suspense fallback={<img src={image.src} alt={image.alt[lang]} />}>
+              <Suspense fallback={null}>
                 <CircularGallery
                   items={items}
                   itemAspect={1.6}

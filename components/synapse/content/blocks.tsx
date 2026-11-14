@@ -11,6 +11,7 @@ import {
   certifications,
   education,
   experience,
+  ISSUER_LOGO,
   ISSUER_TINT,
   issuerOf,
   research,
@@ -101,6 +102,7 @@ export function ProjectGallery({
 export function CertCard({ cert, t }: { cert: Certification; t: UI }) {
   const done = cert.status === "done";
   const tint = ISSUER_TINT[issuerOf(cert)] ?? "#bfeeee";
+  const badge = cert.badge ?? (done ? ISSUER_LOGO[issuerOf(cert)] : undefined);
   return (
     <div
       className="cert-card"
@@ -126,9 +128,7 @@ export function CertCard({ cert, t }: { cert: Certification; t: UI }) {
           intro={false}
         />
       </Suspense>
-      {cert.badge ? (
-        <img className="cert-badge" src={cert.badge} alt="" loading="lazy" />
-      ) : null}
+      {badge ? <img className="cert-badge" src={badge} alt={`${issuerOf(cert)} logo`} loading="lazy" /> : null}
     </div>
   );
 }
