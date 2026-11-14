@@ -139,7 +139,25 @@ export function FocusMode({ lang, t, webgl, hydrated, onOpenImage }: Props) {
       </section>
 
       <section className="focus-contact" id="contato" aria-labelledby="focus-contact">
-        <img src={profile.portraits.monitors} alt="" width={960} height={1200} loading="lazy" />
+        <div className="focus-profile focus-profile-start">
+          <Suspense fallback={<img src={profile.portraits.monitors} alt="" width={960} height={1200} loading="lazy" />}>
+            <ProfileCard
+              avatarUrl={profile.portraits.monitors}
+              miniAvatarUrl={profile.portraits.headshot}
+              name={profile.name}
+              title={profile.role[lang]}
+              handle={profile.handle}
+              status=""
+              contactText="LinkedIn"
+              onContactClick={() => window.open(profile.contact.linkedin, "_blank", "noopener,noreferrer")}
+              backdropColor="#0c121b"
+              radius={10}
+              holo={0.55}
+              glare={0.4}
+              tiltStrength={9}
+            />
+          </Suspense>
+        </div>
         <div>
           <h2 id="focus-contact">{t.contactTitle}</h2>
           <p>

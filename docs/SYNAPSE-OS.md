@@ -60,6 +60,8 @@ post-processing (glow comes from additive point density).
   - `ReflectiveCard`: one card per certification (Focus Mode grid and the certification panel). `webcam` is
     always false; the camera is never requested.
   - `ProfileCard`: the portrait in the Focus Mode hero. `TiltedCard`: project images (click opens the lightbox).
+  - `CircularGallery`: the lightbox for projects with several images (single images and reduced motion keep
+    the plain viewer).
   - Local change in `ReflectiveCard` and `ProfileCard`: three Hugeicons glyphs replaced by inline SVG, so the
     icon packages are not needed.
   These layers are off on small screens, with reduced motion, and after the scene reports a low frame rate.

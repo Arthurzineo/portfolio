@@ -70,16 +70,16 @@ export const areas: readonly Area[] = [
     id: "ai",
     name: "Artificial Intelligence",
     summary: {
-      pt: "IA aplicada a problemas de segurança: pipelines assistidos por IA, detecção de ataques com machine learning e orquestração de agentes.",
-      en: "AI applied to security problems: AI-assisted pipelines, machine-learning attack detection, and agent orchestration.",
+      pt: "IA aplicada a problemas de segurança: pipelines assistidos por IA, detecção de ataques com machine learning e governança de sistemas de IA.",
+      en: "AI applied to security problems: AI-assisted pipelines, machine-learning attack detection, and governance of AI systems.",
     },
   },
   {
     id: "ai-security",
     name: "AI Security",
     summary: {
-      pt: "Evolução do foco para segurança aplicada à IA, com integração segura entre agentes e ferramentas.",
-      en: "An evolving focus on security applied to AI, with secure integration between agents and tools.",
+      pt: "Evolução do foco para segurança aplicada à IA, com gestão de riscos de sistemas de IA.",
+      en: "An evolving focus on security applied to AI, with risk management for AI systems.",
     },
   },
   {
@@ -223,17 +223,18 @@ export const projects: readonly Project[] = [
   {
     id: "openrmf",
     title: "OpenRMF",
+    // Corrected by the owner on 2026-11-14: it manages the NIST AI RMF, it is not an agent orchestrator.
     description: {
-      pt: "Plataforma open source para orquestração de agentes de IA, com coordenação multiagente, memória estruturada e integração segura com ferramentas.",
-      en: "An open-source platform for AI agent orchestration, combining multi-agent coordination, structured memory, and secure tool integration.",
+      pt: "Plataforma open source para gerenciar o padrão NIST AI Risk Management Framework (AI RMF).",
+      en: "An open-source platform for managing the NIST AI Risk Management Framework (AI RMF).",
     },
     // review: release window carried over from the previous site.
     note: { pt: "Disponibilização prevista até o fim de 2026.", en: "Planned for release by the end of 2026." },
-    tags: ["Open Source", "Multi-Agent", "AI Orchestration", "Security"],
+    tags: ["Open Source", "NIST AI RMF", "AI Governance", "Risk Management"],
     images: [{ src: "/openrmf-project.png", alt: { pt: "Dashboard de governança e riscos do OpenRMF", en: "OpenRMF governance and risk dashboard" } }],
     links: [
-      { area: "ai", why: { pt: "Orquestra agentes de IA com memória estruturada.", en: "Orchestrates AI agents with structured memory." } },
-      { area: "ai-security", why: { pt: "Integra agentes a ferramentas de forma segura.", en: "Integrates agents with tools securely." } },
+      { area: "ai", why: { pt: "Trata da governança de sistemas de IA.", en: "Deals with the governance of AI systems." } },
+      { area: "ai-security", why: { pt: "Gerencia riscos de IA segundo o NIST AI RMF.", en: "Manages AI risk following the NIST AI RMF." } },
     ],
   },
 ];

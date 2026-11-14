@@ -814,6 +814,19 @@ dialog[open] > div {
 .lightbox footer {
   padding: 8px;
 }
+.lightbox-carousel {
+  height: min(64dvh, 620px);
+  background: #05080c;
+}
+.lightbox-caption,
+.lightbox-hint {
+  padding: 10px 18px 0;
+  text-align: center;
+}
+.lightbox-hint {
+  padding-bottom: 14px;
+  font-size: 0.8125rem;
+}
 .lightbox footer button {
   min-height: 44px;
   padding: 0 14px;
@@ -842,6 +855,9 @@ dialog[open] > div {
 .focus-profile {
   justify-self: end;
   width: min(360px, 100%);
+}
+.focus-profile-start {
+  justify-self: start;
 }
 .motto {
   margin-top: 8px;
