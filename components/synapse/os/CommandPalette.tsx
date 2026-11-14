@@ -24,7 +24,7 @@ function buildIndex(lang: Lang, t: UI, mode: Mode, canNeural: boolean, go: (s: S
     ...[...technologies].flatMap(([tag, list]) =>
       list.map((p) => ({ key: `t:${tag}:${p.id}`, label: tag, hint: p.title, kind: t.kindTech, run: () => go(p.id) })),
     ),
-    ...certifications.map((c) => ({ key: `c:${c.name}`, label: c.name, hint: c.detail, kind: t.kindCert, run: () => go("certifications") })),
+    ...certifications.map((c) => ({ key: `c:${c.name}`, label: c.name, hint: c.detail, kind: t.kindCert, run: () => go(c.status === "done" ? c.id : "certifications") })),
     ...experience.map((r) => ({
       key: `r:${r.id}`,
       label: r.role[lang],

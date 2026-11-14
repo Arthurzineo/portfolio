@@ -1,7 +1,7 @@
 "use client";
 
 import { neighbors, nodeById, nodeOf, type NodeId, type Selection } from "@/content/graph";
-import { areaById, profile, projectById, projects, type AreaId, type Lang, type ProjectId } from "@/content/portfolio";
+import { areaById, certById, profile, projectById, projects, type AreaId, type CertId, type Lang, type ProjectId } from "@/content/portfolio";
 import type { UI } from "@/content/ui";
 import { CareerAxis, CertList, Education, ProjectGallery, ResearchBlock, RoleList, Tags, type OpenImage } from "../content/blocks";
 
@@ -101,11 +101,24 @@ function ProjectContent({ id, lang, t, onSelect, onOpenImage }: { id: ProjectId 
   );
 }
 
+function CertContent({ id, t }: { id: CertId; t: UI }) {
+  const cert = certById[id];
+  return (
+    <>
+      <h2>{cert.name}</h2>
+      <p className="lede">{cert.detail}</p>
+      <p data-status={cert.status}>
+        <span className="cert-status">{cert.status === "done" ? t.done : t.progress}</span>
+      </p>
+    </>
+  );
+}
+
 export function WorkspacePanel(props: Props) {
   const { selection, t, onSelect } = props;
   if (selection === "core") return null;
   const node = nodeById[nodeOf(selection)];
-  const parent: Selection = node.kind === "project" ? "projects" : "core";
+  const parent: Selection = node.kind === "project" ? "projects" : node.kind === "cert" ? "certifications" : "core";
   return (
     <aside className="workspace" aria-label={t.workspace}>
       <div className="workspace-bar">
@@ -113,7 +126,7 @@ export function WorkspacePanel(props: Props) {
           <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true">
             <path d="M10 3 5 8l5 5" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
           </svg>
-          {parent === "core" ? t.home : t.allProjects}
+          {parent === "core" ? t.home : parent === "projects" ? t.allProjects : t.allCerts}
         </button>
       </div>
       {/* key restarts the content transition whenever the selection changes */}
@@ -121,6 +134,7 @@ export function WorkspacePanel(props: Props) {
         {selection === "about" ? <About {...props} /> : null}
         {node.kind === "area" ? <AreaContent id={node.id as AreaId} {...props} /> : null}
         {node.kind === "project" ? <ProjectContent id={node.id as ProjectId} {...props} /> : null}
+        {node.kind === "cert" ? <CertContent id={node.id as CertId} t={t} /> : null}
       </div>
     </aside>
   );

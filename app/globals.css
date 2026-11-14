@@ -268,7 +268,8 @@ kbd {
     color var(--dur-fast) ease-out;
   will-change: transform;
 }
-.labels button[data-kind="project"] {
+.labels button[data-kind="project"],
+.labels button[data-kind="cert"] {
   font-size: 0.8125rem;
   font-weight: 450;
   --level: 0.74;

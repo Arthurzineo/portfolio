@@ -4,15 +4,15 @@
  * existence. Positions are authored (not force-simulated) so navigation is
  * predictable: a node is always in the same place.
  */
-import { areaLinks, areas, projects, type AreaId, type Loc, type ProjectId } from "./portfolio";
+import { areaLinks, areas, certifications, projects, type AreaId, type CertId, type Loc, type ProjectId } from "./portfolio";
 
-export type NodeId = "core" | AreaId | ProjectId;
+export type NodeId = "core" | AreaId | ProjectId | CertId;
 export type Selection = NodeId | "about";
 export type Vec3 = readonly [number, number, number];
 
 export type GraphNode = {
   id: NodeId;
-  kind: "core" | "area" | "project";
+  kind: "core" | "area" | "project" | "cert";
   label: string;
   position: Vec3;
   radius: number;
@@ -22,7 +22,7 @@ export type GraphEdge = {
   id: string;
   from: NodeId;
   to: NodeId;
-  /** trunk: core to area. branch: Projects to a project. link: a documented relationship. */
+  /** trunk: core to area. branch: an area to one of its own items. link: a documented relationship. */
   kind: "trunk" | "branch" | "link";
   why?: Loc;
 };
@@ -48,6 +48,10 @@ const PROJECT_ANGLES: Record<ProjectId, number> = {
 };
 
 const projectsCenter = AREA_POSITIONS.projects;
+const certsCenter = AREA_POSITIONS.certifications;
+/** Only completed certifications become nodes; the ones in progress stay in the panel list. */
+const earned = certifications.filter((c) => c.status === "done");
+const CERT_ANGLES = [78, 140, 204, 262];
 
 export const nodes: readonly GraphNode[] = [
   { id: "core", kind: "core", label: "Arthur Gonçalves", position: [0, 0, 0], radius: 0.95 },
@@ -62,11 +66,22 @@ export const nodes: readonly GraphNode[] = [
       radius: 0.3,
     };
   }),
+  ...earned.map((c, i): GraphNode => {
+    const a = (CERT_ANGLES[i % CERT_ANGLES.length] * Math.PI) / 180;
+    return {
+      id: c.id,
+      kind: "cert",
+      label: c.name,
+      position: [certsCenter[0] + Math.cos(a) * 1.7, certsCenter[1] + Math.sin(a) * 1.25, certsCenter[2] + 0.7 + 0.3 * Math.sin(2 * a)],
+      radius: 0.26,
+    };
+  }),
 ];
 
 export const edges: readonly GraphEdge[] = [
   ...areas.map((a): GraphEdge => ({ id: `core>${a.id}`, from: "core", to: a.id, kind: "trunk" })),
   ...projects.map((p): GraphEdge => ({ id: `projects>${p.id}`, from: "projects", to: p.id, kind: "branch" })),
+  ...earned.map((c): GraphEdge => ({ id: `certifications>${c.id}`, from: "certifications", to: c.id, kind: "branch" })),
   ...projects.flatMap((p) => p.links.map((l): GraphEdge => ({ id: `${p.id}>${l.area}`, from: p.id, to: l.area, kind: "link", why: l.why }))),
   ...areaLinks.map((l): GraphEdge => ({ id: `${l.a}>${l.b}`, from: l.a, to: l.b, kind: "link", why: l.why })),
 ];

@@ -291,16 +291,17 @@ export const experience: readonly Role[] = [
   },
 ];
 
-export type Certification = { name: string; detail: string; status: "done" | "progress" };
+export type CertId = "cysa" | "pentest" | "security-plus" | "sophos" | "secai" | "securityx";
+export type Certification = { id: CertId; name: string; detail: string; status: "done" | "progress" };
 
 // review: statuses carried over from the previous site; confirm the two in progress.
 export const certifications: readonly Certification[] = [
-  { name: "CompTIA CySA+", detail: "Cybersecurity Analyst", status: "done" },
-  { name: "CompTIA PenTest+", detail: "Penetration Testing", status: "done" },
-  { name: "CompTIA Security+", detail: "Security Foundations", status: "done" },
-  { name: "Sophos Engineer", detail: "Endpoint & Network Security", status: "done" },
-  { name: "CompTIA SecAI+", detail: "AI Security", status: "progress" },
-  { name: "CompTIA SecurityX", detail: "Advanced Security Architecture", status: "progress" },
+  { id: "cysa", name: "CompTIA CySA+", detail: "Cybersecurity Analyst", status: "done" },
+  { id: "pentest", name: "CompTIA PenTest+", detail: "Penetration Testing", status: "done" },
+  { id: "security-plus", name: "CompTIA Security+", detail: "Security Foundations", status: "done" },
+  { id: "sophos", name: "Sophos Engineer", detail: "Endpoint & Network Security", status: "done" },
+  { id: "secai", name: "CompTIA SecAI+", detail: "AI Security", status: "progress" },
+  { id: "securityx", name: "CompTIA SecurityX", detail: "Advanced Security Architecture", status: "progress" },
 ];
 
 // review: expected graduation year carried over from the previous site.
@@ -325,3 +326,4 @@ export const research = {
 
 export const areaById = Object.fromEntries(areas.map((a) => [a.id, a])) as Record<AreaId, Area>;
 export const projectById = Object.fromEntries(projects.map((p) => [p.id, p])) as Record<ProjectId, Project>;
+export const certById = Object.fromEntries(certifications.map((c) => [c.id, c])) as Record<CertId, Certification>;

@@ -201,7 +201,7 @@ function cameraPose(selection: Selection, aspect: number) {
   const p = new THREE.Vector3(...focus.position);
   if (selection === "core") return { position: new THREE.Vector3(0, 0.2, 15 * pull), look: new THREE.Vector3(0, 0, 0) };
   if (selection === "about") return { position: new THREE.Vector3(0, 0, 6.5 * pull), look: new THREE.Vector3(0, 0, 0) };
-  if (focus.kind === "project") return { position: p.clone().multiplyScalar(0.9).add(new THREE.Vector3(0, 0.3, 7.2 * pull)), look: p.clone().multiplyScalar(0.9) };
+  if (focus.kind === "project" || focus.kind === "cert") return { position: p.clone().multiplyScalar(0.9).add(new THREE.Vector3(0, 0.3, 7.2 * pull)), look: p.clone().multiplyScalar(0.9) };
   return { position: p.clone().multiplyScalar(0.45).add(new THREE.Vector3(0, 0, 11 * pull)), look: p.clone().multiplyScalar(0.5) };
 }
 

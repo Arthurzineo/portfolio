@@ -6,7 +6,7 @@
  * Focus Mode, plus the command palette and the image lightbox.
  */
 import { lazy, Suspense, useCallback, useEffect, useRef, useState, useSyncExternalStore } from "react";
-import { nodeOf, nodes, visualStates, type NodeId, type Selection } from "@/content/graph";
+import { nodeById, nodeOf, nodes, visualStates, type NodeId, type Selection } from "@/content/graph";
 import { profile, type Project } from "@/content/portfolio";
 import { ui } from "@/content/ui";
 import { select, setMode, useCompact, useLang, useMode, useReducedMotion, useSelection, useWebGL } from "@/lib/stores";
@@ -66,7 +66,8 @@ export default function SynapseApp() {
         certifications: "certificacoes",
         research: "pesquisa",
       };
-      const id = anchors[target] ?? (document.getElementById(target) ? target : "projetos");
+      const node = target === "about" ? null : nodeById[target];
+      const id = anchors[target] ?? (node?.kind === "cert" ? "certificacoes" : document.getElementById(target) ? target : "projetos");
       document.getElementById(id)?.scrollIntoView({ behavior: reduced ? "auto" : "smooth" });
     },
     [mode, reduced],
