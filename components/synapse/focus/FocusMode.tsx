@@ -1,0 +1,111 @@
+"use client";
+
+/**
+ * Focus Mode: the whole portfolio as one conventional, fast, accessible page.
+ * No WebGL, no motion dependency. This is also what the server renders, so the
+ * content is in the HTML for crawlers and for browsers without JavaScript.
+ */
+import { areaById, profile, projects, type Lang } from "@/content/portfolio";
+import type { UI } from "@/content/ui";
+import { CareerAxis, CertList, Education, ProjectGallery, ResearchBlock, RoleList, Tags, type OpenImage } from "../content/blocks";
+
+type Props = { lang: Lang; t: UI; webgl: boolean; hydrated: boolean; onOpenImage: OpenImage };
+
+export function FocusMode({ lang, t, webgl, hydrated, onOpenImage }: Props) {
+  return (
+    <main className="focus" id="content">
+      {hydrated && !webgl ? <p className="notice">{t.noWebgl}</p> : null}
+
+      <section className="focus-hero" id="inicio" aria-labelledby="focus-name">
+        <div>
+          <h1 id="focus-name">{profile.name}</h1>
+          <p className="focus-role">{profile.role[lang]}</p>
+          <p className="lede">{profile.intro[lang]}</p>
+          <ul className="signals">
+            {profile.signals.map((s) => (
+              <li key={s.en}>{s[lang]}</li>
+            ))}
+          </ul>
+          <nav className="focus-nav" aria-label={t.areasNav}>
+            <a href="#projetos">{t.projects}</a>
+            <a href="#experiencia">{t.experience}</a>
+            <a href="#certificacoes">{t.certifications}</a>
+            <a href="#pesquisa">{t.research}</a>
+            <a href="#contato">{t.contact}</a>
+          </nav>
+        </div>
+        <img src={profile.portraits.standing} alt={profile.portraitAlt[lang]} width={960} height={1200} loading="lazy" />
+      </section>
+
+      <section id="projetos" aria-labelledby="focus-projects">
+        <header className="focus-head">
+          <h2 id="focus-projects">{t.projects}</h2>
+          <p>{areaById.projects.summary[lang]}</p>
+        </header>
+        <div className="focus-projects">
+          {projects.map((project) => (
+            <article key={project.id} id={project.id}>
+              <div>
+                <h3>{project.title}</h3>
+                <p>{project.description[lang]}</p>
+                {project.note ? <p className="quiet">{project.note[lang]}</p> : null}
+                <Tags tags={project.tags} label={t.technologies} />
+                <ul className="reasons">
+                  {project.links.map((link) => (
+                    <li key={link.area}>
+                      <strong>{areaById[link.area].name}</strong>
+                      {link.why[lang]}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+              <ProjectGallery project={project} lang={lang} t={t} onOpen={onOpenImage} />
+            </article>
+          ))}
+        </div>
+      </section>
+
+      <section id="experiencia" aria-labelledby="focus-experience">
+        <header className="focus-head">
+          <h2 id="focus-experience">{t.experience}</h2>
+          <p>{areaById.experience.summary[lang]}</p>
+        </header>
+        <div className="focus-split">
+          <div>
+            <CareerAxis lang={lang} />
+            <Education lang={lang} t={t} />
+          </div>
+          <RoleList lang={lang} />
+        </div>
+      </section>
+
+      <section id="certificacoes" aria-labelledby="focus-certs">
+        <header className="focus-head">
+          <h2 id="focus-certs">{t.certifications}</h2>
+          <p>{areaById.certifications.summary[lang]}</p>
+        </header>
+        <CertList t={t} />
+      </section>
+
+      <section id="pesquisa" aria-labelledby="focus-research">
+        <header className="focus-head">
+          <h2 id="focus-research">{t.research}</h2>
+          <p>{areaById.research.summary[lang]}</p>
+        </header>
+        <ResearchBlock lang={lang} t={t} />
+      </section>
+
+      <section className="focus-contact" id="contato" aria-labelledby="focus-contact">
+        <img src={profile.portraits.monitors} alt="" width={960} height={1200} loading="lazy" />
+        <div>
+          <h2 id="focus-contact">{t.contactTitle}</h2>
+          <p>{profile.contact.text[lang]}</p>
+          <a className="action" href={profile.contact.linkedin} target="_blank" rel="noreferrer">
+            {t.linkedin}
+          </a>
+          <p className="quiet">{profile.motto}</p>
+        </div>
+      </section>
+    </main>
+  );
+}

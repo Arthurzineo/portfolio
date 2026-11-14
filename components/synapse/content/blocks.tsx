@@ -1,0 +1,123 @@
+"use client";
+
+/**
+ * Presentational blocks shared by the workspace panel and Focus Mode, so both
+ * modes show exactly the same information from content/portfolio.ts.
+ */
+import { certifications, education, experience, research, type Lang, type Project } from "@/content/portfolio";
+import type { UI } from "@/content/ui";
+
+export type OpenImage = (project: Project, index: number) => void;
+
+export function Tags({ tags, label }: { tags: readonly string[]; label: string }) {
+  return (
+    <ul className="tags" aria-label={label}>
+      {tags.map((tag) => (
+        <li key={tag}>{tag}</li>
+      ))}
+    </ul>
+  );
+}
+
+export function ProjectGallery({ project, lang, t, onOpen }: { project: Project; lang: Lang; t: UI; onOpen: OpenImage }) {
+  if (project.images.length === 0) return null;
+  return (
+    <ul className="gallery" aria-label={t.gallery} data-count={Math.min(project.images.length, 2)}>
+      {project.images.map((image, index) => (
+        <li key={image.src}>
+          <button type="button" onClick={() => onOpen(project, index)} aria-label={`${t.enlarge}: ${image.alt[lang]}`}>
+            <img src={image.src} alt={image.alt[lang]} loading="lazy" decoding="async" />
+          </button>
+        </li>
+      ))}
+    </ul>
+  );
+}
+
+/** Roles drawn on a real time axis: bar length is proportional to duration. */
+export function CareerAxis({ lang }: { lang: Lang }) {
+  const first = 2021;
+  const last = 2027;
+  const span = last - first;
+  const rows = [...experience].reverse();
+  return (
+    <div className="career-axis" role="img" aria-label={lang === "pt" ? "Linha do tempo de 2021 até hoje" : "Timeline from 2021 to today"}>
+      <div className="career-years" aria-hidden="true">
+        {Array.from({ length: span }, (_, i) => (
+          <span key={i}>{first + i}</span>
+        ))}
+      </div>
+      {rows.map((role) => {
+        // Year granularity only: the source data has no months, so a single-year role fills that year.
+        const end = role.end === null ? last : role.end === role.start ? role.start + 1 : role.end;
+        return (
+          <div className="career-row" key={role.id} aria-hidden="true">
+            <span
+              className="career-bar"
+              data-current={role.end === null}
+              style={{ marginLeft: `${((role.start - first) / span) * 100}%`, width: `${((end - role.start) / span) * 100}%` }}
+            />
+            <span className="career-name">{role.role[lang]}</span>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+export function RoleList({ lang }: { lang: Lang }) {
+  return (
+    <ol className="roles" reversed>
+      {experience.map((role) => (
+        <li key={role.id}>
+          <p className="role-period">{role.period[lang]}</p>
+          <h3>{role.role[lang]}</h3>
+          <p className="role-org">{role.org[lang]}</p>
+          <p>{role.description[lang]}</p>
+        </li>
+      ))}
+    </ol>
+  );
+}
+
+export function Education({ lang, t }: { lang: Lang; t: UI }) {
+  return (
+    <div className="education">
+      <h3>{t.education}</h3>
+      <p>{education[lang]}</p>
+    </div>
+  );
+}
+
+export function CertList({ t }: { t: UI }) {
+  return (
+    <ul className="certs">
+      {certifications.map((cert) => (
+        <li key={cert.name} data-status={cert.status}>
+          <div>
+            <h3>{cert.name}</h3>
+            <p>{cert.detail}</p>
+          </div>
+          <span className="cert-status">{cert.status === "done" ? t.done : t.progress}</span>
+        </li>
+      ))}
+    </ul>
+  );
+}
+
+export function ResearchBlock({ lang, t }: { lang: Lang; t: UI }) {
+  return (
+    <div className="research">
+      <h3>{t.paper}</h3>
+      <p className="paper-title">{research.paperTitle}</p>
+      <h3>{t.pipeline}</h3>
+      <ol className="pipeline">
+        {research.pipeline.map((step) => (
+          <li key={step}>{step}</li>
+        ))}
+      </ol>
+      <p>{research.metrics[lang]}</p>
+      <p className="quiet">{research.publication[lang]}</p>
+    </div>
+  );
+}
