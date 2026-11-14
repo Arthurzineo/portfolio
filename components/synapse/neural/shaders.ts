@@ -90,8 +90,8 @@ void main() {
 
 /**
  * Backdrop: a full-screen pass drawn behind everything. Each neuron lights the
- * "fog" around it, and the light reveals a fine dot lattice that is otherwise
- * invisible, so the background visibly responds to which nodes are active.
+ * "fog" around it, so the background visibly responds to which nodes are active.
+ * The texture of the background itself comes from the GradientASCII layer underneath.
  * uNodes[i] = (x, y, radius) in device pixels and the node's state level.
  */
 export const MAX_GLOW = 28;
@@ -140,7 +140,7 @@ void main() {
     light += color * falloff * 0.15 * n.w * n.w;
   }
   light *= uGlow;
-  // Opening burst: a flash at the core, then a shockwave that sweeps outward and lights the lattice as it passes.
+  // Opening burst: a flash at the core, then a shockwave that sweeps outward.
   float fromCore = length(frag - uCore) / uHeight;
   float ring = exp(-pow((fromCore - uShock * 1.25) / 0.04, 2.0)) * pow(1.0 - uShock, 1.5) * step(0.001, uShock);
   light += mix(uCyan, uIce, 0.4) * ring * 0.55;
@@ -149,10 +149,6 @@ void main() {
   vec2 uv = frag / uHeight;
   float fog = 0.6 + 0.8 * noise(uv * 2.6 + vec2(uTime * 0.02, -uTime * 0.013));
   vec3 color = light * fog;
-
-  vec2 cell = fract(uv * 52.0) - 0.5;
-  float dotMask = smoothstep(0.11, 0.04, length(cell));
-  color += light * dotMask * 2.6;
 
   color = color + (hash(frag) - 0.5) / 255.0;
   gl_FragColor = vec4(max(color, 0.0), max(color.r, max(color.g, color.b)));
