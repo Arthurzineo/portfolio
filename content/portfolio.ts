@@ -350,7 +350,7 @@ export type Certification = {
 };
 /** Card tint per issuer: a colour cue only. Logos come from the official badge files, never redrawn here. */
 /** Issuer mark shown on completed certifications. Files are third-party assets, not drawn here; see docs. */
-export const ISSUER_LOGO: Record<string, string> = { CompTIA: "/badges/comptia.svg" };
+export const ISSUER_LOGO: Record<string, string> = { CompTIA: "/badges/comptia.svg", Sophos: "/badges/sophos.png" };
 export const ISSUER_TINT: Record<string, string> = { CompTIA: "#ff5a5f", Sophos: "#4d8dff" };
 /** The issuer is the first word of the certification name (CompTIA, Sophos). */
 export const issuerOf = (cert: Certification) => cert.name.split(" ")[0];

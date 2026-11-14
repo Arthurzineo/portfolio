@@ -136,8 +136,8 @@ export function CertCard({ cert, t }: { cert: Certification; t: UI }) {
 export function CertCards({ t }: { t: UI }) {
   return (
     <ul className="cert-cards">
-      {certifications.map((cert) => (
-        <li key={cert.id}>
+      {certifications.map((cert, i) => (
+        <li key={cert.id} data-build="card" style={{ "--i": i } as React.CSSProperties}>
           <CertCard cert={cert} t={t} />
         </li>
       ))}
@@ -175,7 +175,7 @@ export function CareerAxis({ lang }: { lang: Lang }) {
               ? role.start + 1
               : role.end;
         return (
-          <div className="career-row" key={role.id} aria-hidden="true">
+          <div className="career-row" key={role.id} aria-hidden="true" data-build="grow" style={{ "--i": rows.indexOf(role) } as React.CSSProperties}>
             <span
               className="career-bar"
               data-current={role.end === null}
@@ -201,8 +201,8 @@ export function RoleList({
 }) {
   return (
     <ol className="roles" reversed>
-      {experience.map((role) => (
-        <li key={role.id}>
+      {experience.map((role, i) => (
+        <li key={role.id} data-build="" style={{ "--i": i } as React.CSSProperties}>
           <p className="role-period">{role.period[lang]}</p>
           <h3>{role.role[lang]}</h3>
           <p className="role-org">{role.org[lang]}</p>
@@ -297,8 +297,10 @@ export function ResearchBlock({ lang, t }: { lang: Lang; t: UI }) {
         {t.pipeline} ({research.protocolName})
       </h3>
       <ol className="pipeline">
-        {research.protocol.map((step) => (
-          <li key={step.en}>{step[lang]}</li>
+        {research.protocol.map((step, i) => (
+          <li key={step.en} data-build="" style={{ "--i": i } as React.CSSProperties}>
+            {step[lang]}
+          </li>
         ))}
       </ol>
       <p>{research.datasets[lang]}</p>

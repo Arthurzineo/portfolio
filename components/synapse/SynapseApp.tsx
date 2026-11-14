@@ -21,6 +21,7 @@ const NeuralScene = lazy(() => import("./neural/NeuralScene"));
 const GradientASCII = lazy(() => import("@/components/reactbits/GradientASCII"));
 const ASCIIText = lazy(() => import("@/components/reactbits/ASCIIText"));
 const ProfileCard = lazy(() => import("@/components/reactbits/ProfileCard"));
+const SideRain = lazy(() => import("./focus/SideRain"));
 const LetterGlitch = lazy(() => import("@/components/reactbits/LetterGlitch"));
 
 const PALETTE = { obsidian: "#080C12", cyan: "#64E4DC", violet: "#7D6BF1", ice: "#E8F0F5" };
@@ -271,6 +272,11 @@ export default function SynapseApp() {
       </div>
 
       <div className="focus-root">
+        {mode === "focus" && !reduced && !compact ? (
+          <Suspense fallback={null}>
+            <SideRain />
+          </Suspense>
+        ) : null}
         {/* Decorative only: Focus Mode content never depends on this layer. */}
         {mode === "focus" && webgl && !reduced && !compact && !lite ? (
           <div className="focus-backdrop" aria-hidden="true">

@@ -28,6 +28,10 @@ Base commit: `3bae8d3`. Branch: `redesign/synapse-os`.
 - Education and Courses are areas with their own item nodes (the degree; the one course evidenced in the old site).
 - Opening: all neurons start packed at the centre, burst outward with a flash and shockwave, then connections trace out.
 - A full-screen backdrop pass makes each neuron light the background, following node state.
+- Focus Mode builds on scroll: elements marked `data-build` play one entrance when they enter the view
+  (IntersectionObserver in `FocusMode.tsx`, states in `globals.css`). No hiding without JS or with reduced motion.
+- `focus/SideRain.tsx`: original 2D-canvas code rain in the side gutters of Focus Mode (no dependency, not
+  derived from any paid component). Off on small screens and with reduced motion.
 - Every connection in the graph has a written reason in `portfolio.ts` (`links[].why`, `areaLinks`).
 - Quality adapts: pixel ratio is capped at 1.75; if average frame time after the intro is worse than about
   42 fps, the scene drops to pixel ratio 1 and half the particles. Small screens use 75% of the particles.
@@ -72,8 +76,8 @@ post-processing (glow comes from additive point density).
 
 `public/badges/comptia.svg` is the CompTIA mark from the `simple-icons` package (v16.37.0, CC0 for the
 collection; the mark itself remains a CompTIA trademark), recoloured white. It appears only on completed
-CompTIA certifications. Sophos has no mark in that package; add an official file as `public/badges/sophos.*`
-and register it in `ISSUER_LOGO` in `content/portfolio.ts`.
+CompTIA certifications. `public/badges/sophos.png` is the Sophos wordmark supplied by the owner, recoloured white for contrast on
+the blue card. Both are registered in `ISSUER_LOGO` in `content/portfolio.ts`.
 
 ## Images
 

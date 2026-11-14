@@ -5,7 +5,7 @@
  * No WebGL, no motion dependency. This is also what the server renders, so the
  * content is in the HTML for crawlers and for browsers without JavaScript.
  */
-import { lazy, Suspense } from "react";
+import React, { lazy, Suspense, useEffect, useRef } from "react";
 import { areaById, courses, profile, projects, type Lang } from "@/content/portfolio";
 import type { UI } from "@/content/ui";
 import { CareerAxis, CertCards, Decrypted, Education, ProjectGallery, ResearchBlock, RoleList, Tags, type OpenImage } from "../content/blocks";
@@ -14,15 +14,47 @@ const ProfileCard = lazy(() => import("@/components/reactbits/ProfileCard"));
 
 type Props = { lang: Lang; t: UI; webgl: boolean; hydrated: boolean; onOpenImage: OpenImage };
 
+/**
+ * "Build on scroll": every element marked data-build starts in a hidden state (see globals.css) and gets
+ * data-inview the first time it enters the viewport, which plays its entrance once. Without JavaScript or
+ * with reduced motion nothing is hidden, so the content is always there.
+ */
+function useBuildOnScroll() {
+  const root = useRef<HTMLElement>(null);
+  useEffect(() => {
+    const el = root.current;
+    if (!el) return;
+    const observer = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          if (!entry.isIntersecting) continue;
+          entry.target.setAttribute("data-inview", "");
+          observer.unobserve(entry.target);
+        }
+      },
+      { rootMargin: "0px 0px -12% 0px", threshold: 0.05 },
+    );
+    el.querySelectorAll("[data-build]").forEach((node) => observer.observe(node));
+    return () => observer.disconnect();
+  }, []);
+  return root;
+}
+
 export function FocusMode({ lang, t, webgl, hydrated, onOpenImage }: Props) {
+  const root = useBuildOnScroll();
   return (
-    <main className="focus" id="content">
+    <main className="focus" id="content" ref={root}>
+      <div className="focus-progress" aria-hidden="true" />
       {hydrated && !webgl ? <p className="notice">{t.noWebgl}</p> : null}
 
       <section className="focus-hero" id="inicio" aria-labelledby="focus-name">
         <div>
-          <h1 id="focus-name">{profile.name}</h1>
-          <p className="focus-role">{profile.role[lang]}</p>
+          <h1 id="focus-name" data-build="wipe">
+            <span>{profile.name}</span>
+          </h1>
+          <p className="focus-role" data-build="" style={{ "--i": 2 } as React.CSSProperties}>
+            {profile.role[lang]}
+          </p>
           <p className="lede">
             <Decrypted text={profile.intro[lang]} />
           </p>
@@ -39,7 +71,7 @@ export function FocusMode({ lang, t, webgl, hydrated, onOpenImage }: Props) {
             <a href="#contato">{t.contact}</a>
           </nav>
         </div>
-        <div className="focus-profile">
+        <div className="focus-profile" data-build="right">
           <Suspense fallback={<img src={profile.portraits.standing} alt={profile.portraitAlt[lang]} width={960} height={1200} />}>
             <ProfileCard
               avatarUrl={profile.portraits.standing}
@@ -60,17 +92,19 @@ export function FocusMode({ lang, t, webgl, hydrated, onOpenImage }: Props) {
         </div>
       </section>
 
-      <section id="projetos" aria-labelledby="focus-projects">
+      <section id="projetos" data-build="rule" aria-labelledby="focus-projects">
         <header className="focus-head">
-          <h2 id="focus-projects">{t.projects}</h2>
+          <h2 id="focus-projects" data-build="wipe">
+            <span>{t.projects}</span>
+          </h2>
           <p>
             <Decrypted text={areaById.projects.summary[lang]} />
           </p>
         </header>
         <div className="focus-projects">
           {projects.map((project) => (
-            <article key={project.id} id={project.id}>
-              <div>
+            <article key={project.id} id={project.id} data-build="rule">
+              <div data-build="left">
                 <h3>{project.title}</h3>
                 <p>
                   <Decrypted text={project.description[lang]} />
@@ -86,15 +120,19 @@ export function FocusMode({ lang, t, webgl, hydrated, onOpenImage }: Props) {
                   ))}
                 </ul>
               </div>
-              <ProjectGallery project={project} lang={lang} t={t} onOpen={onOpenImage} />
+              <div data-build="right" style={{ "--i": 1 } as React.CSSProperties}>
+                <ProjectGallery project={project} lang={lang} t={t} onOpen={onOpenImage} />
+              </div>
             </article>
           ))}
         </div>
       </section>
 
-      <section id="experiencia" aria-labelledby="focus-experience">
+      <section id="experiencia" data-build="rule" aria-labelledby="focus-experience">
         <header className="focus-head">
-          <h2 id="focus-experience">{t.experience}</h2>
+          <h2 id="focus-experience" data-build="wipe">
+            <span>{t.experience}</span>
+          </h2>
           <p>
             <Decrypted text={areaById.experience.summary[lang]} />
           </p>
@@ -108,9 +146,11 @@ export function FocusMode({ lang, t, webgl, hydrated, onOpenImage }: Props) {
         </div>
       </section>
 
-      <section id="certificacoes" aria-labelledby="focus-certs">
+      <section id="certificacoes" data-build="rule" aria-labelledby="focus-certs">
         <header className="focus-head">
-          <h2 id="focus-certs">{t.certifications}</h2>
+          <h2 id="focus-certs" data-build="wipe">
+            <span>{t.certifications}</span>
+          </h2>
           <p>
             <Decrypted text={areaById.certifications.summary[lang]} />
           </p>
@@ -128,9 +168,11 @@ export function FocusMode({ lang, t, webgl, hydrated, onOpenImage }: Props) {
         </div>
       </section>
 
-      <section id="pesquisa" aria-labelledby="focus-research">
+      <section id="pesquisa" data-build="rule" aria-labelledby="focus-research">
         <header className="focus-head">
-          <h2 id="focus-research">{t.research}</h2>
+          <h2 id="focus-research" data-build="wipe">
+            <span>{t.research}</span>
+          </h2>
           <p>
             <Decrypted text={areaById.research.summary[lang]} />
           </p>
@@ -138,8 +180,8 @@ export function FocusMode({ lang, t, webgl, hydrated, onOpenImage }: Props) {
         <ResearchBlock lang={lang} t={t} />
       </section>
 
-      <section className="focus-contact" id="contato" aria-labelledby="focus-contact">
-        <div className="focus-profile focus-profile-start">
+      <section className="focus-contact" id="contato" data-build="rule" aria-labelledby="focus-contact">
+        <div className="focus-profile focus-profile-start" data-build="left">
           <Suspense fallback={<img src={profile.portraits.monitors} alt="" width={960} height={1200} loading="lazy" />}>
             <ProfileCard
               avatarUrl={profile.portraits.monitors}
@@ -159,7 +201,9 @@ export function FocusMode({ lang, t, webgl, hydrated, onOpenImage }: Props) {
           </Suspense>
         </div>
         <div>
-          <h2 id="focus-contact">{t.contactTitle}</h2>
+          <h2 id="focus-contact" data-build="wipe">
+            <span>{t.contactTitle}</span>
+          </h2>
           <p>
             <Decrypted text={profile.contact.text[lang]} />
           </p>

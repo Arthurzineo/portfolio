@@ -879,6 +879,18 @@ dialog[open] > div {
   opacity: 0.42;
   pointer-events: none;
 }
+/* Code rain in the side gutters, faded toward the content and toward the top and bottom edges. */
+.side-rain {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0.85;
+  pointer-events: none;
+  mask-image: linear-gradient(90deg, #000 0, #000 calc(50% - 640px), transparent calc(50% - 570px), transparent calc(50% + 570px), #000 calc(50% + 640px), #000 100%), linear-gradient(transparent 0, #000 14%, #000 86%, transparent 100%);
+  mask-composite: intersect;
+}
 .focus-backdrop canvas {
   pointer-events: none !important;
 }
@@ -944,11 +956,118 @@ dialog[open] > div {
   color: var(--ice);
 }
 .focus > section {
+  position: relative;
   padding-block: 88px;
-  border-top: 1px solid var(--line);
 }
-.focus > section:first-of-type {
-  border-top: 0;
+/* Section and project rules are drawn left to right when they enter the view. */
+.focus > section::before,
+.focus-projects article::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 1px;
+  background: var(--line);
+  transform-origin: left;
+}
+.focus > section:first-of-type::before {
+  content: none;
+}
+
+/* Build on scroll. The hidden state applies only once the boot script has run (html[data-mode]),
+   so without JavaScript everything is simply visible. */
+html[data-mode] .focus [data-build] {
+  opacity: 0;
+  transform: translateY(20px);
+  filter: blur(5px);
+  transition:
+    opacity 650ms var(--ease),
+    transform 800ms var(--ease),
+    filter 650ms var(--ease),
+    clip-path 900ms var(--ease);
+  transition-delay: calc(var(--i, 0) * 80ms);
+}
+html[data-mode] .focus [data-build="left"] {
+  transform: translateX(-36px);
+}
+html[data-mode] .focus [data-build="right"] {
+  transform: translateX(36px);
+}
+html[data-mode] .focus [data-build="card"] {
+  transform: perspective(900px) rotateX(14deg) translateY(36px) scale(0.94);
+  transform-origin: 50% 100%;
+}
+/* The wipe clips an inner span: clipping the observed element itself would hide it from IntersectionObserver. */
+html[data-mode] .focus [data-build="wipe"] {
+  opacity: 1;
+  filter: none;
+  transform: none;
+}
+html[data-mode] .focus [data-build="wipe"] > span {
+  display: inline-block;
+  transform: translateX(-14px);
+  clip-path: inset(-10% 100% -10% 0);
+  transition:
+    transform 800ms var(--ease),
+    clip-path 900ms var(--ease);
+}
+html[data-mode] .focus [data-build="wipe"][data-inview] > span {
+  transform: none;
+  clip-path: inset(-10% 0 -10% 0);
+}
+html[data-mode] .focus [data-build="rule"] {
+  opacity: 1;
+  filter: none;
+  transform: none;
+}
+html[data-mode] .focus [data-build="rule"]::before {
+  transform: scaleX(0);
+  transition: transform 1100ms var(--ease);
+}
+html[data-mode] .focus [data-build="grow"] {
+  opacity: 1;
+  filter: none;
+  transform: none;
+}
+html[data-mode] .focus [data-build="grow"] .career-bar {
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 900ms var(--ease);
+  transition-delay: calc(var(--i, 0) * 110ms + 150ms);
+}
+html[data-mode] .focus [data-build][data-inview] {
+  opacity: 1;
+  transform: none;
+  filter: none;
+}
+html[data-mode] .focus [data-build][data-inview]::before,
+html[data-mode] .focus [data-build][data-inview] .career-bar {
+  transform: none;
+}
+
+/* Reading progress, driven by the scroll position itself where the browser supports it. */
+.focus-progress {
+  display: none;
+}
+@supports (animation-timeline: scroll()) {
+  .focus-progress {
+    display: block;
+    position: fixed;
+    inset: var(--bar) 0 auto 0;
+    z-index: 29;
+    height: 2px;
+    background: linear-gradient(90deg, var(--cyan), var(--violet));
+    transform-origin: left;
+    animation: progress linear both;
+    animation-timeline: scroll(root);
+  }
+}
+@keyframes progress {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
 }
 .focus-hero {
   display: grid;
@@ -1015,8 +1134,8 @@ dialog[open] > div {
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
   gap: 40px;
+  position: relative;
   padding-block: 32px;
-  border-top: 1px solid var(--line);
   scroll-margin-top: calc(var(--bar) + 16px);
 }
 .focus-projects article > div {
@@ -1202,5 +1321,17 @@ dialog[open] > div {
   *::after {
     animation: none !important;
     transition: none !important;
+  }
+  html[data-mode] .focus [data-build],
+  html[data-mode] .focus [data-build="wipe"] > span,
+  html[data-mode] .focus [data-build]::before,
+  html[data-mode] .focus [data-build] .career-bar {
+    opacity: 1;
+    transform: none;
+    filter: none;
+    clip-path: none;
+  }
+  .focus-progress {
+    display: none;
   }
 }
