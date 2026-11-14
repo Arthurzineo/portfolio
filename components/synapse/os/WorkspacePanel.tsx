@@ -1,7 +1,7 @@
 "use client";
 
-import { neighbors, nodeById, nodeOf, type NodeId, type Selection } from "@/content/graph";
-import { areaById, certById, profile, projectById, projects, type AreaId, type CertId, type Lang, type ProjectId } from "@/content/portfolio";
+import { itemById, items, neighbors, nodeById, nodeOf, type ItemId, type NodeId, type Selection } from "@/content/graph";
+import { areaById, profile, projectById, projects, type AreaId, type Lang, type ProjectId } from "@/content/portfolio";
 import type { UI } from "@/content/ui";
 import { CareerAxis, CertList, Education, ProjectGallery, ResearchBlock, RoleList, Tags, type OpenImage } from "../content/blocks";
 
@@ -79,6 +79,7 @@ function AreaContent({ id, ...rest }: { id: AreaId } & Omit<Props, "selection">)
         </>
       ) : null}
       {id === "certifications" ? <CertList t={t} /> : null}
+      {id === "education" || id === "courses" ? <AreaItems id={id} lang={lang} onSelect={onSelect} /> : null}
       {id === "research" ? <ResearchBlock lang={lang} t={t} /> : null}
       <Connections id={id} lang={lang} t={t} onSelect={onSelect} only="project" />
       <Connections id={id} lang={lang} t={t} onSelect={onSelect} only="area" />
@@ -101,24 +102,45 @@ function ProjectContent({ id, lang, t, onSelect, onOpenImage }: { id: ProjectId 
   );
 }
 
-function CertContent({ id, t }: { id: CertId; t: UI }) {
-  const cert = certById[id];
+function ItemContent({ id, lang, t, onSelect }: { id: ItemId } & Omit<Props, "selection" | "onOpenImage">) {
+  const item = itemById[id];
   return (
     <>
-      <h2>{cert.name}</h2>
-      <p className="lede">{cert.detail}</p>
-      <p data-status={cert.status}>
-        <span className="cert-status">{cert.status === "done" ? t.done : t.progress}</span>
-      </p>
+      <h2>{item.title[lang]}</h2>
+      <p className="lede">{item.detail[lang]}</p>
+      {item.status ? (
+        <p data-status={item.status}>
+          <span className="cert-status">{item.status === "done" ? t.done : t.progress}</span>
+        </p>
+      ) : null}
+      <Connections id={id} lang={lang} t={t} onSelect={onSelect} only="project" />
+      <Connections id={id} lang={lang} t={t} onSelect={onSelect} only="area" />
     </>
   );
 }
 
+/** The courses or degrees that belong to an area, as buttons into their nodes. */
+function AreaItems({ id, lang, onSelect }: { id: AreaId; lang: Lang; onSelect: Props["onSelect"] }) {
+  const list = items.filter((i) => i.parent === id);
+  return (
+    <ul className="connections">
+      {list.map((i) => (
+        <li key={i.id}>
+          <button type="button" onClick={() => onSelect(i.id)}>
+            <span className="connection-name">{i.title[lang]}</span>
+            <span className="connection-why">{i.detail[lang]}</span>
+          </button>
+        </li>
+      ))}
+    </ul>
+  );
+}
+
 export function WorkspacePanel(props: Props) {
-  const { selection, t, onSelect } = props;
+  const { selection, lang, t, onSelect } = props;
   if (selection === "core") return null;
   const node = nodeById[nodeOf(selection)];
-  const parent: Selection = node.kind === "project" ? "projects" : node.kind === "cert" ? "certifications" : "core";
+  const parent: Selection = node.kind === "project" ? "projects" : node.kind === "item" ? itemById[node.id as ItemId].parent : "core";
   return (
     <aside className="workspace" aria-label={t.workspace}>
       <div className="workspace-bar">
@@ -126,7 +148,7 @@ export function WorkspacePanel(props: Props) {
           <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true">
             <path d="M10 3 5 8l5 5" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
           </svg>
-          {parent === "core" ? t.home : parent === "projects" ? t.allProjects : t.allCerts}
+          {parent === "core" ? t.home : parent === "projects" ? t.allProjects : nodeById[parent as NodeId].label}
         </button>
       </div>
       {/* key restarts the content transition whenever the selection changes */}
@@ -134,7 +156,7 @@ export function WorkspacePanel(props: Props) {
         {selection === "about" ? <About {...props} /> : null}
         {node.kind === "area" ? <AreaContent id={node.id as AreaId} {...props} /> : null}
         {node.kind === "project" ? <ProjectContent id={node.id as ProjectId} {...props} /> : null}
-        {node.kind === "cert" ? <CertContent id={node.id as CertId} t={t} /> : null}
+        {node.kind === "item" ? <ItemContent id={node.id as ItemId} lang={lang} t={t} onSelect={onSelect} /> : null}
       </div>
     </aside>
   );

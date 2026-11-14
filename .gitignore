@@ -4,3 +4,4 @@ dist
 .wrangler
 .next
 *.log
+tsconfig.tsbuildinfo

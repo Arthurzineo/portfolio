@@ -4,15 +4,17 @@
  * existence. Positions are authored (not force-simulated) so navigation is
  * predictable: a node is always in the same place.
  */
-import { areaLinks, areas, certifications, projects, type AreaId, type CertId, type Loc, type ProjectId } from "./portfolio";
+import { areaLinks, areas, certifications, courses, degrees, itemLinks, projects, type AreaId, type CertId, type Loc, type ProjectId } from "./portfolio";
 
-export type NodeId = "core" | AreaId | ProjectId | CertId;
+export type ItemId = CertId | "smart-recon" | "software-engineering";
+export type NodeId = "core" | AreaId | ProjectId | ItemId;
 export type Selection = NodeId | "about";
 export type Vec3 = readonly [number, number, number];
 
 export type GraphNode = {
   id: NodeId;
-  kind: "core" | "area" | "project" | "cert";
+  /** item: something that belongs to one area (a certification, a course, a degree). */
+  kind: "core" | "area" | "project" | "item";
   label: string;
   position: Vec3;
   radius: number;
@@ -36,6 +38,8 @@ const AREA_POSITIONS: Record<AreaId, Vec3> = {
   experience: [-4.9, -0.9, 0.8],
   certifications: [-5.4, 1.5, -1.8],
   infrastructure: [-1.7, -3.9, -1.6],
+  education: [5.9, 3.7, -2.6],
+  courses: [-2.7, -2.3, -2.4],
 };
 
 /** Angle (degrees) of each project around the Projects area, placed toward its related areas. */
@@ -48,10 +52,18 @@ const PROJECT_ANGLES: Record<ProjectId, number> = {
 };
 
 const projectsCenter = AREA_POSITIONS.projects;
-const certsCenter = AREA_POSITIONS.certifications;
-/** Only completed certifications become nodes; the ones in progress stay in the panel list. */
-const earned = certifications.filter((c) => c.status === "done");
+/** Items that orbit an area. Only completed certifications become nodes; the ones in progress stay in the panel list. */
+export type Item = { id: ItemId; parent: AreaId; title: Record<"pt" | "en", string>; detail: Loc; status?: "done" | "progress"; angle: number };
+const same = (text: string) => ({ pt: text, en: text });
 const CERT_ANGLES = [78, 140, 204, 262];
+export const items: readonly Item[] = [
+  ...certifications
+    .filter((c) => c.status === "done")
+    .map((c, i): Item => ({ id: c.id, parent: "certifications", title: same(c.name), detail: same(c.detail), status: c.status, angle: CERT_ANGLES[i % 4] })),
+  ...courses.map((c, i): Item => ({ id: c.id, parent: "courses", title: same(c.name), detail: c.detail, angle: 95 + i * 80 })),
+  ...degrees.map((d, i): Item => ({ id: d.id, parent: "education", title: d.name, detail: d.detail, angle: 150 + i * 80 })),
+];
+export const itemById = Object.fromEntries(items.map((i) => [i.id, i])) as Record<ItemId, Item>;
 
 export const nodes: readonly GraphNode[] = [
   { id: "core", kind: "core", label: "Arthur Gonçalves", position: [0, 0, 0], radius: 0.95 },
@@ -66,13 +78,14 @@ export const nodes: readonly GraphNode[] = [
       radius: 0.3,
     };
   }),
-  ...earned.map((c, i): GraphNode => {
-    const a = (CERT_ANGLES[i % CERT_ANGLES.length] * Math.PI) / 180;
+  ...items.map((item): GraphNode => {
+    const a = (item.angle * Math.PI) / 180;
+    const c = AREA_POSITIONS[item.parent];
     return {
-      id: c.id,
-      kind: "cert",
-      label: c.name,
-      position: [certsCenter[0] + Math.cos(a) * 1.7, certsCenter[1] + Math.sin(a) * 1.25, certsCenter[2] + 0.7 + 0.3 * Math.sin(2 * a)],
+      id: item.id,
+      kind: "item",
+      label: item.title.en,
+      position: [c[0] + Math.cos(a) * 1.7, c[1] + Math.sin(a) * 1.25, c[2] + 0.7 + 0.3 * Math.sin(2 * a)],
       radius: 0.26,
     };
   }),
@@ -81,7 +94,8 @@ export const nodes: readonly GraphNode[] = [
 export const edges: readonly GraphEdge[] = [
   ...areas.map((a): GraphEdge => ({ id: `core>${a.id}`, from: "core", to: a.id, kind: "trunk" })),
   ...projects.map((p): GraphEdge => ({ id: `projects>${p.id}`, from: "projects", to: p.id, kind: "branch" })),
-  ...earned.map((c): GraphEdge => ({ id: `certifications>${c.id}`, from: "certifications", to: c.id, kind: "branch" })),
+  ...items.map((i): GraphEdge => ({ id: `${i.parent}>${i.id}`, from: i.parent, to: i.id, kind: "branch" })),
+  ...itemLinks.map((l): GraphEdge => ({ id: `${l.item}>${l.to}`, from: l.item as NodeId, to: l.to, kind: "link", why: l.why })),
   ...projects.flatMap((p) => p.links.map((l): GraphEdge => ({ id: `${p.id}>${l.area}`, from: p.id, to: l.area, kind: "link", why: l.why }))),
   ...areaLinks.map((l): GraphEdge => ({ id: `${l.a}>${l.b}`, from: l.a, to: l.b, kind: "link", why: l.why })),
 ];

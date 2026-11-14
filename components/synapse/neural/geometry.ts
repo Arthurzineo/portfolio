@@ -13,7 +13,7 @@ export function mulberry32(seed: number) {
   };
 }
 
-const POINTS = { core: 900, area: 320, project: 150, cert: 110 } as const;
+const POINTS = { core: 900, area: 320, project: 150, item: 110 } as const;
 
 /** A neuron-like point cloud: a gaussian nucleus with curved dendrite spikes. */
 export function somaGeometry(kind: keyof typeof POINTS, radius: number, seed: number) {

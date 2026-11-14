@@ -269,7 +269,7 @@ kbd {
   will-change: transform;
 }
 .labels button[data-kind="project"],
-.labels button[data-kind="cert"] {
+.labels button[data-kind="item"] {
   font-size: 0.8125rem;
   font-weight: 450;
   --level: 0.74;
@@ -282,7 +282,6 @@ kbd {
 }
 .labels button[data-state="hot"] {
   --level: 1;
-  --depth: 1 !important;
   color: var(--cyan);
   font-weight: 650;
 }
@@ -887,6 +886,17 @@ dialog[open] > div {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(min(340px, 100%), 1fr));
   column-gap: 48px;
+}
+.focus-courses {
+  margin-top: 32px;
+}
+.focus-courses li {
+  margin-top: 6px;
+  color: var(--mist);
+}
+.focus-courses strong {
+  color: var(--ice);
+  font-weight: 600;
 }
 .focus-contact {
   display: grid;

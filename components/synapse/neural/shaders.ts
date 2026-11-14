@@ -28,7 +28,7 @@ void main() {
   vec4 mv = modelViewMatrix * vec4(p, 1.0);
   gl_Position = projectionMatrix * mv;
   float keep = step(aSeed, uDensity);
-  gl_PointSize = keep * aSize * uPx * (1.15 + 0.45 * uState) / -mv.z;
+  gl_PointSize = keep * aSize * uPx * (1.15 + 0.45 * uState) * mix(0.4, 1.0, uIntro) / -mv.z;
   vSeed = aSeed;
 }`;
 
@@ -86,6 +86,76 @@ void main() {
   alpha += pulse * (0.35 + 0.6 * smoothstep(0.9, 2.0, vState));
   alpha *= smoothstep(0.0, 0.04, vT) * smoothstep(1.0, 0.96, vT);
   gl_FragColor = vec4(color * alpha, alpha);
+}`;
+
+/**
+ * Backdrop: a full-screen pass drawn behind everything. Each neuron lights the
+ * "fog" around it, and the light reveals a fine dot lattice that is otherwise
+ * invisible, so the background visibly responds to which nodes are active.
+ * uNodes[i] = (x, y, radius) in device pixels and the node's state level.
+ */
+export const MAX_GLOW = 28;
+
+export const backdropVertex = /* glsl */ `
+void main() {
+  gl_Position = vec4(position.xy, 0.9999, 1.0);
+}`;
+
+export const backdropFragment = /* glsl */ `
+uniform vec4 uNodes[${MAX_GLOW}];
+uniform int uCount;
+uniform vec3 uCyan;
+uniform vec3 uViolet;
+uniform vec3 uIce;
+uniform float uTime;
+uniform float uHeight;
+uniform vec2 uCore;
+uniform float uShock;
+uniform float uFlash;
+uniform float uGlow;
+
+float hash(vec2 p) {
+  p = fract(p * vec2(123.34, 456.21));
+  p += dot(p, p + 45.32);
+  return fract(p.x * p.y);
+}
+float noise(vec2 p) {
+  vec2 i = floor(p);
+  vec2 f = fract(p);
+  f = f * f * (3.0 - 2.0 * f);
+  return mix(mix(hash(i), hash(i + vec2(1.0, 0.0)), f.x), mix(hash(i + vec2(0.0, 1.0)), hash(i + vec2(1.0, 1.0)), f.x), f.y);
+}
+
+void main() {
+  vec2 frag = gl_FragCoord.xy;
+  vec3 light = vec3(0.0);
+  for (int i = 0; i < ${MAX_GLOW}; i++) {
+    if (i >= uCount) break;
+    vec4 n = uNodes[i];
+    vec2 d = (frag - n.xy) / n.z;
+    float falloff = exp(-dot(d, d) * 2.4);
+    float lit = smoothstep(1.0, 1.7, n.w);
+    vec3 hue = mix(uCyan, uViolet, fract(float(i) * 0.618 + 0.2));
+    vec3 color = mix(mix(hue, uIce, 0.35) * 0.6, hue, lit);
+    light += color * falloff * 0.15 * n.w * n.w;
+  }
+  light *= uGlow;
+  // Opening burst: a flash at the core, then a shockwave that sweeps outward and lights the lattice as it passes.
+  float fromCore = length(frag - uCore) / uHeight;
+  float ring = exp(-pow((fromCore - uShock * 1.25) / 0.04, 2.0)) * pow(1.0 - uShock, 1.5) * step(0.001, uShock);
+  light += mix(uCyan, uIce, 0.4) * ring * 0.55;
+  light += uIce * exp(-fromCore * fromCore / 0.03) * uFlash * 0.9;
+
+  vec2 uv = frag / uHeight;
+  float fog = 0.6 + 0.8 * noise(uv * 2.6 + vec2(uTime * 0.02, -uTime * 0.013));
+  vec3 color = light * fog;
+
+  vec2 cell = fract(uv * 52.0) - 0.5;
+  float dotMask = smoothstep(0.11, 0.04, length(cell));
+  color += light * dotMask * 2.6;
+
+  color = color + (hash(frag) - 0.5) / 255.0;
+  gl_FragColor = vec4(max(color, 0.0), max(color.r, max(color.g, color.b)));
 }`;
 
 export const PALETTE = {

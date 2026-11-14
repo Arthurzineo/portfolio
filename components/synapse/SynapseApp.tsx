@@ -6,7 +6,7 @@
  * Focus Mode, plus the command palette and the image lightbox.
  */
 import { lazy, Suspense, useCallback, useEffect, useRef, useState, useSyncExternalStore } from "react";
-import { nodeById, nodeOf, nodes, visualStates, type NodeId, type Selection } from "@/content/graph";
+import { itemById, nodeById, nodeOf, nodes, visualStates, type ItemId, type NodeId, type Selection } from "@/content/graph";
 import { profile, type Project } from "@/content/portfolio";
 import { ui } from "@/content/ui";
 import { select, setMode, useCompact, useLang, useMode, useReducedMotion, useSelection, useWebGL } from "@/lib/stores";
@@ -65,9 +65,11 @@ export default function SynapseApp() {
         experience: "experiencia",
         certifications: "certificacoes",
         research: "pesquisa",
+        education: "experiencia",
+        courses: "certificacoes",
       };
       const node = target === "about" ? null : nodeById[target];
-      const id = anchors[target] ?? (node?.kind === "cert" ? "certificacoes" : document.getElementById(target) ? target : "projetos");
+      const id = anchors[target] ?? (node?.kind === "item" ? (anchors[itemById[node.id as ItemId].parent] ?? "certificacoes") : document.getElementById(target) ? target : "projetos");
       document.getElementById(id)?.scrollIntoView({ behavior: reduced ? "auto" : "smooth" });
     },
     [mode, reduced],
@@ -132,7 +134,7 @@ export default function SynapseApp() {
                   onFocus={() => setHovered(node.id)}
                   onBlur={() => setHovered(null)}
                 >
-                  {node.kind === "core" ? t.about : node.label}
+                  {node.kind === "core" ? t.about : node.kind === "item" ? itemById[node.id as ItemId].title[lang] : node.label}
                 </button>
               ))}
             </nav>

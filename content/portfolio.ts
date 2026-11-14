@@ -18,7 +18,9 @@ export type AreaId =
   | "projects"
   | "experience"
   | "certifications"
-  | "infrastructure";
+  | "infrastructure"
+  | "education"
+  | "courses";
 
 export type ProjectId = "ksc-receiver" | "inoichi" | "recon-automation" | "web-attack-detection" | "openrmf";
 
@@ -116,6 +118,22 @@ export const areas: readonly Area[] = [
     summary: {
       pt: "Administração de ambientes Windows e Linux, redes, troubleshooting e suporte à infraestrutura crítica.",
       en: "Windows and Linux administration, networking, troubleshooting, and critical infrastructure support.",
+    },
+  },
+  {
+    id: "education",
+    name: "Education",
+    summary: {
+      pt: "Graduação em Engenharia de Software na Universidade de Caxias do Sul.",
+      en: "Bachelor's degree in Software Engineering at the University of Caxias do Sul.",
+    },
+  },
+  {
+    id: "courses",
+    name: "Courses",
+    summary: {
+      pt: "Cursos complementares à formação e às certificações.",
+      en: "Courses that complement the degree and the certifications.",
     },
   },
 ];
@@ -218,12 +236,39 @@ export const projects: readonly Project[] = [
   },
 ];
 
+/** Relationships between a course or degree and another node. */
+export const itemLinks: readonly { item: string; to: AreaId | ProjectId; why: Loc }[] = [
+  { item: "smart-recon", to: "recon-automation", why: { pt: "O certificado do curso está na galeria do projeto.", en: "The course certificate is in the project gallery." } },
+  { item: "software-engineering", to: "research", why: { pt: "A pesquisa é o TCC da graduação.", en: "The research is the degree's final thesis." } },
+];
+
 /** Area-to-area relationships that do not pass through a project. */
 export const areaLinks: readonly { a: AreaId; b: AreaId; why: Loc }[] = [
   { a: "experience", b: "security", why: { pt: "Segurança de endpoints e SIEM/EDR no dia a dia da UCS.", en: "Endpoint security and SIEM/EDR in day-to-day work at UCS." } },
   { a: "experience", b: "infrastructure", why: { pt: "Administração de Windows, Linux e redes desde 2022.", en: "Windows, Linux, and network administration since 2022." } },
   { a: "certifications", b: "security", why: { pt: "CySA+, PenTest+, Security+ e Sophos Engineer.", en: "CySA+, PenTest+, Security+, and Sophos Engineer." } },
   { a: "certifications", b: "ai-security", why: { pt: "CompTIA SecAI+, em preparação.", en: "CompTIA SecAI+, in progress." } },
+];
+
+export type Degree = { id: "software-engineering"; name: Loc; detail: Loc };
+// review: expected graduation year carried over from the previous site.
+export const degrees: readonly Degree[] = [
+  {
+    id: "software-engineering",
+    name: { pt: "Engenharia de Software", en: "Software Engineering" },
+    detail: { pt: "Universidade de Caxias do Sul. Conclusão prevista em 2026.", en: "University of Caxias do Sul. Expected graduation in 2026." },
+  },
+];
+
+export type Course = { id: "smart-recon"; name: string; detail: Loc };
+// review: only the course evidenced in the previous site (its certificate is in the Recon Automation
+// gallery) is listed. Add the others here; provider and year are unknown and left out on purpose.
+export const courses: readonly Course[] = [
+  {
+    id: "smart-recon",
+    name: "Smart Recon para Pentest",
+    detail: { pt: "Curso de reconhecimento para testes de intrusão, com certificado.", en: "Reconnaissance course for penetration testing, with certificate." },
+  },
 ];
 
 export type Role = { id: string; start: number; end: number | null; period: Loc; role: Loc; org: Loc; description: Loc };

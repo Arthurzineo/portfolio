@@ -25,6 +25,9 @@ Base commit: `3bae8d3`. Branch: `redesign/synapse-os`.
 - Selection lives in the hash (`#/ksc-receiver`), so back/forward and deep links work. `Esc` returns to the core.
 - `Ctrl/Cmd + K` opens the command palette (projects, areas, technologies, certifications, roles, actions).
 - Completed certifications are nodes around Certifications; the ones in progress stay in the panel list.
+- Education and Courses are areas with their own item nodes (the degree; the one course evidenced in the old site).
+- Opening: all neurons start packed at the centre, burst outward with a flash and shockwave, then connections trace out.
+- A full-screen backdrop pass makes each neuron light the background and reveal a dot lattice, following node state.
 - Every connection in the graph has a written reason in `portfolio.ts` (`links[].why`, `areaLinks`).
 - Quality adapts: pixel ratio is capped at 1.75; if average frame time after the intro is worse than about
   42 fps, the scene drops to pixel ratio 1 and half the particles. Small screens use 75% of the particles.

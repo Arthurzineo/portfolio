@@ -5,7 +5,7 @@
  * No WebGL, no motion dependency. This is also what the server renders, so the
  * content is in the HTML for crawlers and for browsers without JavaScript.
  */
-import { areaById, profile, projects, type Lang } from "@/content/portfolio";
+import { areaById, courses, profile, projects, type Lang } from "@/content/portfolio";
 import type { UI } from "@/content/ui";
 import { CareerAxis, CertList, Education, ProjectGallery, ResearchBlock, RoleList, Tags, type OpenImage } from "../content/blocks";
 
@@ -85,6 +85,16 @@ export function FocusMode({ lang, t, webgl, hydrated, onOpenImage }: Props) {
           <p>{areaById.certifications.summary[lang]}</p>
         </header>
         <CertList t={t} />
+        <div className="focus-courses">
+          <h3>{t.courses}</h3>
+          <ul>
+            {courses.map((course) => (
+              <li key={course.id}>
+                <strong>{course.name}</strong> {course.detail[lang]}
+              </li>
+            ))}
+          </ul>
+        </div>
       </section>
 
       <section id="pesquisa" aria-labelledby="focus-research">
