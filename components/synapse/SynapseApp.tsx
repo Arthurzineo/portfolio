@@ -20,6 +20,7 @@ const NeuralScene = lazy(() => import("./neural/NeuralScene"));
 // React Bits effects are client-only canvases; each loads on demand so Focus Mode stays light.
 const GradientASCII = lazy(() => import("@/components/reactbits/GradientASCII"));
 const ASCIIText = lazy(() => import("@/components/reactbits/ASCIIText"));
+const ProfileCard = lazy(() => import("@/components/reactbits/ProfileCard"));
 const LetterGlitch = lazy(() => import("@/components/reactbits/LetterGlitch"));
 
 const PALETTE = { obsidian: "#080C12", cyan: "#64E4DC", violet: "#7D6BF1", ice: "#E8F0F5" };
@@ -194,7 +195,26 @@ export default function SynapseApp() {
           </div>
 
           <div className="hero" data-hidden={panelOpen} inert={panelOpen}>
-            <img src={profile.portraits.headshot} alt={profile.portraitAlt[lang]} width={960} height={1200} fetchPriority="high" />
+            {compact || !hydrated ? (
+              <img src={profile.portraits.headshot} alt={profile.portraitAlt[lang]} width={960} height={1200} fetchPriority="high" />
+            ) : (
+              <div className="hero-card">
+                <Suspense fallback={<img src={profile.portraits.headshot} alt={profile.portraitAlt[lang]} width={960} height={1200} />}>
+                  <ProfileCard
+                    avatarUrl={profile.portraits.headshot}
+                    name=""
+                    title=""
+                    showUserInfo={false}
+                    backdropColor="#0c121b"
+                    radius={8}
+                    holo={0.55}
+                    glare={0.4}
+                    tiltStrength={10}
+                    intro={false}
+                  />
+                </Suspense>
+              </div>
+            )}
             <div>
               <h1 data-ascii={effects}>{profile.name}</h1>
               {effects ? (

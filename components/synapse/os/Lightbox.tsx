@@ -36,6 +36,7 @@ export function Lightbox({ project, start, lang, t, onClose }: Props) {
     <dialog
       ref={dialog}
       className="lightbox"
+      data-carousel={carousel}
       aria-label={`${project.title}: ${t.gallery}`}
       onClose={onClose}
       onClick={(e) => {
@@ -47,7 +48,7 @@ export function Lightbox({ project, start, lang, t, onClose }: Props) {
         if (e.key === "ArrowRight") step(1);
       }}
     >
-      <div className="lightbox-box">
+      <div className="lightbox-box" data-carousel={carousel}>
         <header>
           <p>
             {project.title}
@@ -70,6 +71,8 @@ export function Lightbox({ project, start, lang, t, onClose }: Props) {
                   bend={1.6}
                   gap={0.2}
                   wave={0.4}
+                  fadeEdges={0}
+                  shadow={0.35}
                   borderRadius={0.03}
                   textColor="#E8F0F5"
                   font="600 22px 'Archivo Variable', sans-serif"
@@ -78,8 +81,10 @@ export function Lightbox({ project, start, lang, t, onClose }: Props) {
                 />
               </Suspense>
             </div>
-            <p className="lightbox-caption">{image.alt[lang]}</p>
-            <p className="lightbox-hint quiet">{t.carouselHint}</p>
+            <div className="lightbox-glass">
+              <p className="lightbox-caption">{image.alt[lang]}</p>
+              <p className="lightbox-hint">{t.carouselHint}</p>
+            </div>
           </>
         ) : (
           <img src={image.src} alt={image.alt[lang]} />
