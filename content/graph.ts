@@ -122,6 +122,23 @@ export function neighbors(id: NodeId): Neighbor[] {
   return out;
 }
 
+/**
+ * What a node's panel lists under its connections: every edge touching the node, grouped by the kind of the
+ * other end. Two edges are left out on purpose: the trunk back to the core (the panel has a back button),
+ * and an area's own children, which the area lists in its own section (projects, certifications, items).
+ */
+export function panelConnections(id: NodeId) {
+  const self = nodeById[id];
+  const out: Record<"project" | "area" | "item", Neighbor[]> = { project: [], area: [], item: [] };
+  for (const n of neighbors(id)) {
+    const other = nodeById[n.id];
+    if (other.kind === "core") continue;
+    if (n.kind === "branch" && self.kind === "area") continue;
+    out[other.kind].push(n);
+  }
+  return out;
+}
+
 export type VisualState = "dim" | "normal" | "linked" | "hot";
 
 /** How each node and edge should read for the current selection and hover. */

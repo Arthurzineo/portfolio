@@ -96,6 +96,115 @@ html[data-mode="neural"] .focus-root {
   display: none;
 }
 
+/* ------------------------------------------------------------------ entrance sequence
+   One ordered opening instead of pieces popping in as they load. Everything below is paused in its starting
+   state while html[data-boot="wait"], and runs when the scene draws its first frame (data-boot="ready"):
+   0.0s background and core charge · 0.2s top bar, left to right · 0.7s the core bursts · 1.0s portrait card ·
+   1.3s name · 1.5s role · 1.65s intro · 1.8s buttons, one by one · 1.9s node names (driven by the scene).
+   Without JavaScript there is no data-boot, so nothing is animated or hidden. */
+html[data-boot] .topbar > *,
+html[data-boot] .hero > img,
+html[data-boot] .hero-card,
+html[data-boot] .hero h1,
+html[data-boot] .hero-ascii,
+html[data-boot] .hero-role,
+html[data-boot] .hero-intro,
+html[data-boot] .hero-actions > *,
+html[data-boot] .area-list > *,
+html[data-boot] .stage-ascii {
+  animation: rise-in 800ms var(--ease) both paused;
+}
+html[data-boot="ready"] .topbar > *,
+html[data-boot="ready"] .hero > img,
+html[data-boot="ready"] .hero-card,
+html[data-boot="ready"] .hero h1,
+html[data-boot="ready"] .hero-ascii,
+html[data-boot="ready"] .hero-role,
+html[data-boot="ready"] .hero-intro,
+html[data-boot="ready"] .hero-actions > *,
+html[data-boot="ready"] .area-list > *,
+html[data-boot="ready"] .stage-ascii {
+  animation-play-state: running;
+}
+html[data-boot] .stage-ascii {
+  animation-name: fade-in;
+  animation-duration: 1600ms;
+  animation-delay: 0ms;
+}
+html[data-boot] .topbar > * {
+  animation-name: drop-in;
+  animation-duration: 700ms;
+}
+html[data-boot] .topbar > :nth-child(1) {
+  animation-delay: 200ms;
+}
+html[data-boot] .topbar > :nth-child(2) {
+  animation-delay: 320ms;
+}
+html[data-boot] .topbar > :nth-child(3) {
+  animation-delay: 440ms;
+}
+html[data-boot] .hero > img,
+html[data-boot] .hero-card {
+  animation-name: card-in;
+  animation-duration: 1000ms;
+  animation-delay: 1000ms;
+}
+html[data-boot] .hero h1,
+html[data-boot] .hero-ascii {
+  animation-name: wipe-in;
+  animation-duration: 1000ms;
+  animation-delay: 1300ms;
+}
+html[data-boot] .hero-role {
+  animation-delay: 1500ms;
+}
+html[data-boot] .hero-intro {
+  animation-delay: 1650ms;
+}
+html[data-boot] .hero-actions > :nth-child(1) {
+  animation-delay: 1800ms;
+}
+html[data-boot] .hero-actions > :nth-child(2) {
+  animation-delay: 1900ms;
+}
+html[data-boot] .hero-actions > :nth-child(3) {
+  animation-delay: 2000ms;
+}
+html[data-boot] .area-list > * {
+  animation-delay: 2100ms;
+}
+@keyframes rise-in {
+  from {
+    opacity: 0;
+    transform: translateY(18px);
+    filter: blur(5px);
+  }
+}
+@keyframes drop-in {
+  from {
+    opacity: 0;
+    transform: translateY(-14px);
+    filter: blur(4px);
+  }
+}
+@keyframes card-in {
+  from {
+    opacity: 0;
+    transform: perspective(900px) rotateX(16deg) translateY(44px) scale(0.92);
+  }
+}
+@keyframes wipe-in {
+  from {
+    opacity: 0;
+    transform: translateX(-18px);
+    clip-path: inset(-30% 100% -30% 0);
+  }
+  to {
+    clip-path: inset(-30% 0 -30% 0);
+  }
+}
+
 /* ------------------------------------------------------------------ actions */
 .action {
   display: inline-flex;
@@ -243,7 +352,6 @@ kbd {
   inset: 0;
   opacity: 0.5;
   mask-image: radial-gradient(75% 70% at 55% 45%, rgb(0 0 0 / 0.25) 0%, #000 100%);
-  animation: fade-in 1.6s 1.2s var(--ease) both;
 }
 @keyframes fade-in {
   from {
@@ -256,6 +364,14 @@ kbd {
 }
 .stage-canvas canvas {
   display: block;
+}
+/* Our own pinch and sideways drag; vertical drags are left to the page scroll. */
+.stage-canvas,
+.stage-canvas * {
+  touch-action: pan-y;
+}
+.gesture-hint {
+  display: none;
 }
 .stage[data-hover="true"] canvas {
   cursor: pointer;
@@ -1233,12 +1349,29 @@ html[data-mode] .focus [data-build][data-inview] .career-bar {
     background: radial-gradient(70% 60% at 50% 50%, #0f1826 0%, var(--obsidian) 75%);
   }
   .labels button {
-    font-size: 0.75rem;
-    padding: 10px 6px;
+    font-size: 0.6875rem;
+    padding: 8px 4px;
   }
-  .labels button[data-state="normal"],
-  .labels button[data-state="dim"] {
+  /* Phone: area names always show; project and item names appear once zoomed in or when related. */
+  .labels button[data-kind="project"],
+  .labels button[data-kind="item"] {
     display: none;
+  }
+  .labels button[data-near="1"],
+  .labels button[data-state="linked"],
+  .labels button[data-state="hot"] {
+    display: block;
+  }
+  .gesture-hint {
+    display: block;
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 8px;
+    text-align: center;
+    font-size: 0.75rem;
+    color: var(--mist);
+    pointer-events: none;
   }
   .area-list:not([hidden]) {
     display: grid;

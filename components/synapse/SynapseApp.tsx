@@ -29,6 +29,9 @@ const PALETTE = { obsidian: "#080C12", cyan: "#64E4DC", violet: "#7D6BF1", ice: 
 const CURTAIN_MS = 620;
 
 const sceneOnFor = (mode: Mode, webgl: boolean) => mode === "neural" && webgl;
+const markReady = () => {
+  document.documentElement.dataset.boot = "ready";
+};
 const noop = () => () => {};
 const ignore = () => {};
 const noLabels = { current: new Map<NodeId, HTMLElement>() };
@@ -62,6 +65,11 @@ export default function SynapseApp() {
     (next: Mode) => {
       if (next === mode) return;
       if (reduced) return setMode(next);
+      // Going back to the neural stage replays its entrance, held until the scene draws again.
+      if (next === "neural") {
+        document.documentElement.dataset.boot = "wait";
+        timers.current.push(window.setTimeout(markReady, 4500));
+      }
       setCurtain(true);
       timers.current.push(window.setTimeout(() => setMode(next), CURTAIN_MS * 0.45), window.setTimeout(() => setCurtain(false), CURTAIN_MS));
     },
@@ -169,6 +177,7 @@ export default function SynapseApp() {
                   shift={compact ? 0 : panelOpen ? 0.15 : -0.16}
                   lift={compact || panelOpen ? 0 : 0.05}
                   labels={labels}
+                  onReady={markReady}
                   onSlow={() => setLite(true)}
                 />
               </Suspense>
@@ -195,6 +204,7 @@ export default function SynapseApp() {
                 </button>
               ))}
             </nav>
+            {sceneOn ? <p className="gesture-hint">{t.gestureHint}</p> : null}
           </div>
 
           <div className="hero" data-hidden={panelOpen} inert={panelOpen}>

@@ -243,6 +243,12 @@ export const projects: readonly Project[] = [
 export const itemLinks: readonly { item: string; to: AreaId | ProjectId; why: Loc }[] = [
   { item: "smart-recon", to: "recon-automation", why: { pt: "O certificado do curso está na galeria do projeto.", en: "The course certificate is in the project gallery." } },
   { item: "software-engineering", to: "research", why: { pt: "A pesquisa é o TCC da graduação.", en: "The research is the degree's final thesis." } },
+  // Each completed certification points at the area it certifies. The reason is the certification's own subject.
+  { item: "cysa", to: "security", why: { pt: "Certifica análise de cibersegurança.", en: "Certifies cybersecurity analysis." } },
+  { item: "pentest", to: "security", why: { pt: "Certifica testes de intrusão.", en: "Certifies penetration testing." } },
+  { item: "security-plus", to: "security", why: { pt: "Certifica fundamentos de segurança.", en: "Certifies security foundations." } },
+  { item: "sophos", to: "security", why: { pt: "Certifica segurança de endpoint e rede.", en: "Certifies endpoint and network security." } },
+  { item: "secai", to: "ai-security", why: { pt: "Certifica segurança aplicada à IA.", en: "Certifies security applied to AI." } },
 ];
 
 /** Area-to-area relationships that do not pass through a project. */

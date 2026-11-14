@@ -26,12 +26,18 @@ Base commit: `3bae8d3`. Branch: `redesign/synapse-os`.
 - `Ctrl/Cmd + K` opens the command palette (projects, areas, technologies, certifications, roles, actions).
 - Completed certifications are nodes around Certifications; the ones in progress stay in the panel list.
 - Education and Courses are areas with their own item nodes (the degree; the one course evidenced in the old site).
+- Entrance sequence: `data-boot` on `<html>` holds the top bar, portrait, name, text and buttons in their
+  starting state until the scene draws its first frame, then they enter in order alongside the burst
+  (timeline in `globals.css`). A 4.5 s timer releases it if the scene never starts.
 - Opening: all neurons start packed at the centre, burst outward with a flash and shockwave, then connections trace out.
 - A full-screen backdrop pass makes each neuron light the background, following node state.
 - Focus Mode builds on scroll: elements marked `data-build` play one entrance when they enter the view
   (IntersectionObserver in `FocusMode.tsx`, states in `globals.css`). No hiding without JS or with reduced motion.
 - `focus/SideRain.tsx`: original 2D-canvas code rain in the side gutters of Focus Mode (no dependency, not
   derived from any paid component). Off on small screens and with reduced motion.
+- Gestures in the neural scene: pinch or wheel to zoom, drag to orbit (sideways only on touch, so the page
+  still scrolls). A new selection resets the view. Phones show area names always and the rest when zoomed in.
+- Connections come from `panelConnections()` in `content/graph.ts`: every edge is listed on both ends.
 - Every connection in the graph has a written reason in `portfolio.ts` (`links[].why`, `areaLinks`).
 - Quality adapts: pixel ratio is capped at 1.75; if average frame time after the intro is worse than about
   42 fps, the scene drops to pixel ratio 1 and half the particles. Small screens use 75% of the particles.

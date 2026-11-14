@@ -1,6 +1,6 @@
 "use client";
 
-import { itemById, items, neighbors, nodeById, nodeOf, type ItemId, type NodeId, type Selection } from "@/content/graph";
+import { itemById, items, nodeById, nodeOf, panelConnections, type ItemId, type NodeId, type Selection } from "@/content/graph";
 import { areaById, certifications, profile, projectById, projects, type AreaId, type Lang, type ProjectId } from "@/content/portfolio";
 import type { UI } from "@/content/ui";
 import { lazy, Suspense } from "react";
@@ -11,30 +11,37 @@ const Radar = lazy(() => import("@/components/reactbits/Radar"));
 type Props = { selection: Selection; lang: Lang; t: UI; onSelect: (s: Selection) => void; onOpenImage: OpenImage };
 
 /** Other nodes this one is connected to, each with the documented reason. */
-function Connections({ id, lang, t, onSelect, only }: { id: NodeId; lang: Lang; t: UI; onSelect: Props["onSelect"]; only: "project" | "area" }) {
-  // "area" also lists the parent area of an item (a branch edge), so every node shows where it hangs from.
-  const list = neighbors(id).filter(
-    (n) => nodeById[n.id].kind === only && (n.kind === "link" || (only === "area" && n.kind === "branch" && nodeById[id].kind === "item")),
-  );
-  if (list.length === 0) return null;
+function Connections({ id, lang, t, onSelect }: { id: NodeId; lang: Lang; t: UI; onSelect: Props["onSelect"] }) {
+  const groups = panelConnections(id);
+  const sections = [
+    { key: "project", title: t.relatedProjects, list: groups.project },
+    { key: "item", title: t.relatedItems, list: groups.item },
+    { key: "area", title: t.connections, list: groups.area },
+  ].filter((g) => g.list.length > 0);
   return (
-    <section>
-      <h3>{only === "project" ? t.relatedProjects : t.connections}</h3>
-      <ul className="connections">
-        {list.map((n) => (
-          <li key={n.id}>
-            <button type="button" onClick={() => onSelect(n.id)}>
-              <span className="connection-name">{nodeById[n.id].label}</span>
-              {n.why ? <span className="connection-why">{n.why[lang]}</span> : null}
-            </button>
-          </li>
-        ))}
-      </ul>
-    </section>
+    <>
+      {sections.map((group) => (
+        <section key={group.key}>
+          <h3>{group.title}</h3>
+          <ul className="connections">
+            {group.list.map((n) => (
+              <li key={n.id}>
+                <button type="button" onClick={() => onSelect(n.id)}>
+                  <span className="connection-name">{nodeLabel(n.id, lang)}</span>
+                  {n.why ? <span className="connection-why">{n.why[lang]}</span> : null}
+                </button>
+              </li>
+            ))}
+          </ul>
+        </section>
+      ))}
+    </>
   );
 }
 
-function About({ lang, t }: { lang: Lang; t: UI }) {
+const nodeLabel = (id: NodeId, lang: Lang) => (nodeById[id].kind === "item" ? itemById[id as ItemId].title[lang] : nodeById[id].label);
+
+function About({ lang, t, onSelect }: { lang: Lang; t: UI; onSelect: Props["onSelect"] }) {
   return (
     <>
       <img className="panel-portrait" src={profile.portraits.desk} alt={profile.portraitAlt[lang]} width={960} height={1200} />
@@ -47,6 +54,7 @@ function About({ lang, t }: { lang: Lang; t: UI }) {
         ))}
       </ul>
       <Education lang={lang} t={t} />
+      <Connections id="core" lang={lang} t={t} onSelect={onSelect} />
       <section>
         <h3>{t.contact}</h3>
         <p>{profile.contact.text[lang]}</p>
@@ -95,8 +103,7 @@ function AreaContent({ id, ...rest }: { id: AreaId } & Omit<Props, "selection">)
       {id === "certifications" ? <CertLinks t={t} onSelect={onSelect} /> : null}
       {id === "education" || id === "courses" ? <AreaItems id={id} lang={lang} onSelect={onSelect} /> : null}
       {id === "research" ? <ResearchBlock lang={lang} t={t} /> : null}
-      <Connections id={id} lang={lang} t={t} onSelect={onSelect} only="project" />
-      <Connections id={id} lang={lang} t={t} onSelect={onSelect} only="area" />
+      <Connections id={id} lang={lang} t={t} onSelect={onSelect} />
     </>
   );
 }
@@ -113,7 +120,7 @@ function ProjectContent({ id, lang, t, onSelect, onOpenImage }: { id: ProjectId 
       <Tags tags={project.tags} label={t.technologies} />
       <ProjectGallery project={project} lang={lang} t={t} onOpen={onOpenImage} />
       {id === "web-attack-detection" ? <ResearchBlock lang={lang} t={t} /> : null}
-      <Connections id={id} lang={lang} t={t} onSelect={onSelect} only="area" />
+      <Connections id={id} lang={lang} t={t} onSelect={onSelect} />
     </>
   );
 }
@@ -135,8 +142,7 @@ function ItemContent({ id, lang, t, onSelect }: { id: ItemId } & Omit<Props, "se
           <CertStatus status={item.status} t={t} />
         </p>
       ) : null}
-      <Connections id={id} lang={lang} t={t} onSelect={onSelect} only="project" />
-      <Connections id={id} lang={lang} t={t} onSelect={onSelect} only="area" />
+      <Connections id={id} lang={lang} t={t} onSelect={onSelect} />
     </>
   );
 }

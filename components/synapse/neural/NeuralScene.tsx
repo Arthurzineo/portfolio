@@ -23,6 +23,8 @@ export type NeuralSceneProps = {
   /** Fraction of the viewport height the scene shifts up. */
   lift: number;
   labels: RefObject<Map<NodeId, HTMLElement>>;
+  /** Called on the first rendered frame, so the shell can start its entrance in step with the opening burst. */
+  onReady?: () => void;
   /** Called once if the device cannot hold the frame rate, so the shell can drop its decorative layers too. */
   onSlow?: () => void;
   /** Background use (Focus Mode): no labels, no hit targets, and the camera drifts with page scroll. */
@@ -30,11 +32,17 @@ export type NeuralSceneProps = {
 };
 
 type Quality = "high" | "low";
+/** Visitor-controlled view on top of the authored camera pose: pinch or wheel to zoom, drag to orbit. */
+type View = { zoom: number; yaw: number; pitch: number };
+const ZOOM_MIN = 0.6;
+const ZOOM_MAX = 3.4;
 /** `clock` is the intro time in seconds, advanced by Rig with clamped frame deltas so a slow first frame (shader compilation) cannot skip the opening. */
 type Shared = { reduced: boolean; density: number; clock: { current: number } };
 /** Screen position and radius of every node, written by Rig each frame and read by Backdrop. */
 type GlowBuffer = { current: Float32Array };
 
+const AXIS_Y = new THREE.Vector3(0, 1, 0);
+const AXIS_X = new THREE.Vector3(1, 0, 0);
 const smooth = (t: number) => t * t * (3 - 2 * t);
 const clamp01 = (t: number) => Math.min(1, Math.max(0, t));
 
@@ -265,6 +273,7 @@ function HitTargets({ onHover, onSelect }: Pick<NeuralSceneProps, "onHover" | "o
           }}
           onPointerOut={() => onHover(null)}
           onClick={(e: ThreeEvent<MouseEvent>) => {
+            if (e.delta > 6) return; // that was a drag, not a click
             e.stopPropagation();
             onSelect(node.id);
           }}
@@ -275,6 +284,82 @@ function HitTargets({ onHover, onSelect }: Pick<NeuralSceneProps, "onHover" | "o
       ))}
     </>
   );
+}
+
+/**
+ * Pointer gestures on the stage. Listeners sit on the `.stage-canvas` wrapper so a gesture that starts on a
+ * label still works. One finger dragged sideways orbits (vertical drags stay with the page scroll through
+ * `touch-action: pan-y`), two fingers pinch to zoom, the mouse drags to orbit and the wheel zooms.
+ */
+function Gestures({ viewRef, wheel, selection }: { viewRef: RefObject<View>; wheel: boolean; selection: Selection }) {
+  const gl = useThree((s) => s.gl);
+  const invalidate = useThree((s) => s.invalidate);
+
+  // A new selection starts from the authored framing again.
+  useEffect(() => {
+    viewRef.current.zoom = 1;
+    viewRef.current.yaw = 0;
+    viewRef.current.pitch = 0;
+  }, [selection, viewRef]);
+
+  useEffect(() => {
+    const host = (gl.domElement.closest(".stage-canvas") as HTMLElement | null) ?? gl.domElement;
+    const pointers = new Map<number, { x: number; y: number }>();
+    let pinch = 0;
+    const view = viewRef.current;
+    const clampZoom = (z: number) => Math.min(ZOOM_MAX, Math.max(ZOOM_MIN, z));
+    const spread = () => {
+      const [a, b] = [...pointers.values()];
+      return Math.hypot(a.x - b.x, a.y - b.y);
+    };
+
+    const down = (e: PointerEvent) => {
+      pointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
+      if (pointers.size === 2) pinch = spread();
+    };
+    const move = (e: PointerEvent) => {
+      const prev = pointers.get(e.pointerId);
+      if (!prev) return;
+      const dx = e.clientX - prev.x;
+      const dy = e.clientY - prev.y;
+      pointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
+      if (pointers.size === 2) {
+        const d = spread();
+        if (pinch > 0) view.zoom = clampZoom(view.zoom * (d / pinch));
+        pinch = d;
+      } else if (pointers.size === 1) {
+        view.yaw -= dx * 0.005;
+        if (e.pointerType === "mouse") view.pitch = Math.min(0.9, Math.max(-0.9, view.pitch + dy * 0.004));
+      }
+      invalidate();
+    };
+    const up = (e: PointerEvent) => {
+      pointers.delete(e.pointerId);
+      pinch = 0;
+    };
+    const onWheel = (e: WheelEvent) => {
+      if (!wheel) return;
+      e.preventDefault();
+      view.zoom = clampZoom(view.zoom * Math.exp(-e.deltaY * 0.0012));
+      invalidate();
+    };
+
+    host.addEventListener("pointerdown", down);
+    host.addEventListener("pointermove", move);
+    host.addEventListener("pointerup", up);
+    host.addEventListener("pointercancel", up);
+    host.addEventListener("pointerleave", up);
+    host.addEventListener("wheel", onWheel, { passive: false });
+    return () => {
+      host.removeEventListener("pointerdown", down);
+      host.removeEventListener("pointermove", move);
+      host.removeEventListener("pointerup", up);
+      host.removeEventListener("pointercancel", up);
+      host.removeEventListener("pointerleave", up);
+      host.removeEventListener("wheel", onWheel);
+    };
+  }, [gl, invalidate, viewRef, wheel]);
+  return null;
 }
 
 /** Scales the whole graph from the origin during the opening burst. */
@@ -297,7 +382,7 @@ function cameraPose(selection: Selection, aspect: number) {
 }
 
 /** Moves the camera, positions the HTML labels, and watches frame time. */
-function Rig({ selection, reduced, shift, lift, labels, glow, clockRef, ambient, onSlow }: Pick<NeuralSceneProps, "selection" | "reduced" | "shift" | "lift" | "labels" | "ambient"> & { glow: GlowBuffer; clockRef: RefObject<number>; onSlow: () => void }) {
+function Rig({ selection, reduced, shift, lift, labels, glow, clockRef, viewRef, ambient, onReady, onSlow }: Pick<NeuralSceneProps, "selection" | "reduced" | "shift" | "lift" | "labels" | "ambient" | "onReady"> & { viewRef: RefObject<View>; glow: GlowBuffer; clockRef: RefObject<number>; onSlow: () => void }) {
   const size = useThree((s) => s.size);
   const pose = useMemo(() => cameraPose(selection, size.width / size.height), [selection, size.width, size.height]);
   const position = useRef(new THREE.Vector3(0, 0.1, 6));
@@ -305,10 +390,16 @@ function Rig({ selection, reduced, shift, lift, labels, glow, clockRef, ambient,
   const offset = useRef({ x: 0, y: 0 });
   const frames = useRef({ count: 0, total: 0, reported: false });
   const scratch = useRef(new THREE.Vector3());
+  const smoothView = useRef<View>({ zoom: 1, yaw: 0, pitch: 0 });
+  const started = useRef(false);
   const target = useRef(new THREE.Vector3());
 
   useFrame((state, dt) => {
     const camera = state.camera as THREE.PerspectiveCamera;
+    if (!started.current) {
+      started.current = true;
+      onReady?.();
+    }
     clockRef.current += Math.min(dt, 1 / 12);
     const t = clockRef.current;
     const burst = reduced ? 1 : intro.burst(t);
@@ -330,7 +421,15 @@ function Rig({ selection, reduced, shift, lift, labels, glow, clockRef, ambient,
     offset.current.x += (shift * state.size.width - offset.current.x) * ko;
     offset.current.y += (lift * state.size.height - offset.current.y) * ko;
 
-    camera.position.copy(position.current);
+    // Apply the visitor's zoom and orbit around the current look target.
+    const view = viewRef.current;
+    smoothView.current.zoom += (view.zoom - smoothView.current.zoom) * (reduced ? 1 : 1 - Math.exp(-dt * 10));
+    smoothView.current.yaw += (view.yaw - smoothView.current.yaw) * (reduced ? 1 : 1 - Math.exp(-dt * 10));
+    smoothView.current.pitch += (view.pitch - smoothView.current.pitch) * (reduced ? 1 : 1 - Math.exp(-dt * 10));
+    const arm = scratch.current.copy(position.current).sub(look.current).divideScalar(smoothView.current.zoom);
+    arm.applyAxisAngle(AXIS_Y, smoothView.current.yaw);
+    arm.applyAxisAngle(AXIS_X, -smoothView.current.pitch);
+    camera.position.copy(look.current).add(arm);
     if (!reduced && !ambient) {
       camera.position.x += state.pointer.x * 0.35;
       camera.position.y += state.pointer.y * 0.22;
@@ -359,6 +458,8 @@ function Rig({ selection, reduced, shift, lift, labels, glow, clockRef, ambient,
       }
       const y = cy + radius * 1.15 + 4;
       el.style.visibility = "visible";
+      const near = smoothView.current.zoom > 1.3 ? "1" : "0";
+      if (el.dataset.near !== near) el.dataset.near = near;
       el.style.transform = `translate3d(${x.toFixed(1)}px, ${y.toFixed(1)}px, 0) translateX(-50%)`;
       el.style.setProperty("--depth", (THREE.MathUtils.clamp(1.5 - distance / 16, 0.55, 1) * labelFade).toFixed(2));
     });
@@ -390,6 +491,7 @@ export default function NeuralScene(props: NeuralSceneProps) {
 
   const levels = useMemo(() => nodes.map((n) => STATE_LEVEL[nodeState[n.id]]), [nodeState]);
   const glow = useRef(new Float32Array(MAX_GLOW * 3));
+  const view = useRef<View>({ zoom: 1, yaw: 0, pitch: 0 });
 
   return (
     <Canvas
@@ -399,11 +501,12 @@ export default function NeuralScene(props: NeuralSceneProps) {
       gl={{ antialias: false, alpha: true, powerPreference: "high-performance" }}
       aria-hidden="true"
     >
-      <Rig selection={selection} reduced={reduced} shift={props.shift} lift={props.lift} labels={props.labels} glow={glow} clockRef={clock} ambient={props.ambient} onSlow={() => {
+      <Rig selection={selection} reduced={reduced} shift={props.shift} lift={props.lift} labels={props.labels} glow={glow} clockRef={clock} viewRef={view} onReady={props.onReady} ambient={props.ambient} onSlow={() => {
           setQuality("low");
           props.onSlow?.();
         }}
       />
+      {ambient ? null : <Gestures viewRef={view} wheel={!compact} selection={selection} />}
       <Backdrop levels={levels} glow={glow} shared={shared} />
       <Dust shared={shared} />
       <Burst shared={shared}>
