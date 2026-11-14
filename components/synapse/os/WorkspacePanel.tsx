@@ -1,10 +1,10 @@
 "use client";
 
 import { itemById, items, neighbors, nodeById, nodeOf, type ItemId, type NodeId, type Selection } from "@/content/graph";
-import { areaById, profile, projectById, projects, type AreaId, type Lang, type ProjectId } from "@/content/portfolio";
+import { areaById, certifications, profile, projectById, projects, type AreaId, type Lang, type ProjectId } from "@/content/portfolio";
 import type { UI } from "@/content/ui";
 import { lazy, Suspense } from "react";
-import { CareerAxis, CertList, CertStatus, Decrypted, Education, ProjectGallery, ResearchBlock, RoleList, Tags, type OpenImage } from "../content/blocks";
+import { CareerAxis, CertCard, CertList, CertStatus, Decrypted, Education, ProjectGallery, ResearchBlock, RoleList, Tags, type OpenImage } from "../content/blocks";
 
 const Radar = lazy(() => import("@/components/reactbits/Radar"));
 
@@ -117,8 +117,14 @@ function ProjectContent({ id, lang, t, onSelect, onOpenImage }: { id: ProjectId 
 
 function ItemContent({ id, lang, t, onSelect }: { id: ItemId } & Omit<Props, "selection" | "onOpenImage">) {
   const item = itemById[id];
+  const cert = certifications.find((c) => c.id === id);
   return (
     <>
+      {cert ? (
+        <div className="panel-cert">
+          <CertCard cert={cert} t={t} />
+        </div>
+      ) : null}
       <h2>{item.title[lang]}</h2>
       <p className="lede">{item.detail[lang]}</p>
       {item.status ? (

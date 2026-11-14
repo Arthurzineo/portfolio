@@ -14,7 +14,7 @@ Base commit: `3bae8d3`. Branch: `redesign/synapse-os`.
 | `components/synapse/SynapseApp.tsx` | Shell that wires stores to both presentations. |
 | `components/synapse/neural/` | WebGL scene (React Three Fiber). Lazy-loaded, client only. |
 | `components/synapse/os/` | Top bar, workspace panel, command palette, lightbox. |
-| `components/synapse/focus/FocusMode.tsx` | Conventional page with all content. Server-rendered. |
+| `components/synapse/focus/FocusMode.tsx` | Conventional page with all content. Server-rendered. An optional ambient copy of the neural scene sits behind it and orbits with scroll; content never depends on it. |
 | `components/synapse/content/blocks.tsx` | Blocks shared by the panel and Focus Mode. |
 
 ## Behaviour
@@ -57,6 +57,11 @@ post-processing (glow comes from additive point density).
   - `LetterGlitch`: 620 ms curtain when switching between Neural and Focus.
   - `FuzzyText`: the "in progress" certification status.
   - `DecryptedText`: project summaries, once, when they enter the view.
+  - `ReflectiveCard`: one card per certification (Focus Mode grid and the certification panel). `webcam` is
+    always false; the camera is never requested.
+  - `ProfileCard`: the portrait in the Focus Mode hero. `TiltedCard`: project images (click opens the lightbox).
+  - Local change in `ReflectiveCard` and `ProfileCard`: three Hugeicons glyphs replaced by inline SVG, so the
+    icon packages are not needed.
   These layers are off on small screens, with reduced motion, and after the scene reports a low frame rate.
 - transitions.dev: duration and easing tokens (`--dur-*`, `--ease`) and the panel/modal patterns in `globals.css`.
 - Taste Skill (MIT) and Anthropic frontend-design: read as art-direction checklists. No installer was run.
@@ -68,7 +73,8 @@ Project screenshots are unchanged.
 
 ## Owner review before publishing
 
-- Certification statuses (SecAI+ and SecurityX "in progress").
+- Certification status of SecurityX ("in progress"). SecAI+ was confirmed completed on 2026-11-14.
+- Certification cards show text only. Official badge artwork was not available and is not recreated here.
 - Expected graduation "2026" and the OpenRMF release window.
 - Connection reasons written for this redesign (`links[].why`, `areaLinks`) – confirm each is accurate.
 

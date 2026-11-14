@@ -28,6 +28,8 @@ const CURTAIN_MS = 620;
 
 const sceneOnFor = (mode: Mode, webgl: boolean) => mode === "neural" && webgl;
 const noop = () => () => {};
+const ignore = () => {};
+const noLabels = { current: new Map<NodeId, HTMLElement>() };
 const useHydrated = () =>
   useSyncExternalStore(
     noop,
@@ -247,6 +249,26 @@ export default function SynapseApp() {
       </div>
 
       <div className="focus-root">
+        {/* Decorative only: Focus Mode content never depends on this layer. */}
+        {mode === "focus" && webgl && !reduced && !compact && !lite ? (
+          <div className="focus-backdrop" aria-hidden="true">
+            <Suspense fallback={null}>
+              <NeuralScene
+                ambient
+                selection="core"
+                hovered={null}
+                onHover={ignore}
+                onSelect={ignore}
+                reduced={false}
+                compact={false}
+                shift={-0.18}
+                lift={0}
+                labels={noLabels}
+                onSlow={() => setLite(true)}
+              />
+            </Suspense>
+          </div>
+        ) : null}
         <FocusMode lang={lang} t={t} webgl={webgl} hydrated={hydrated} onOpenImage={openImage} />
       </div>
 

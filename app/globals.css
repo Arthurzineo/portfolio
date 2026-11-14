@@ -505,24 +505,16 @@ kbd {
 .gallery[data-count="1"] {
   grid-template-columns: minmax(0, 1fr);
 }
-.gallery button {
-  display: block;
-  width: 100%;
-  overflow: hidden;
-  border-radius: 4px;
-  background: #05080c;
-  box-shadow: inset 0 0 0 1px var(--line);
+.gallery li {
+  aspect-ratio: 16 / 10;
   cursor: zoom-in;
 }
 .gallery img {
   width: 100%;
-  aspect-ratio: 16 / 10;
+  height: 100%;
   object-fit: cover;
   object-position: top left;
-  transition: opacity var(--dur-quick) ease-out;
-}
-.gallery button:hover img {
-  opacity: 0.82;
+  border-radius: 4px;
 }
 .career-axis {
   display: flex;
@@ -833,6 +825,48 @@ dialog[open] > div {
 }
 
 /* ------------------------------------------------------------------ focus mode */
+.focus-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  opacity: 0.42;
+  pointer-events: none;
+}
+.focus-backdrop canvas {
+  pointer-events: none !important;
+}
+.focus {
+  position: relative;
+  z-index: 1;
+}
+.focus-profile {
+  justify-self: end;
+  width: min(360px, 100%);
+}
+.motto {
+  margin-top: 8px;
+  color: var(--mist);
+}
+.motto cite {
+  display: block;
+  margin-top: 2px;
+  font-style: normal;
+  font-size: 0.875rem;
+}
+.cert-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(260px, 100%), 1fr));
+  gap: 20px;
+}
+.cert-card-fallback {
+  height: 360px;
+  border-radius: 10px;
+  background: var(--surface);
+  box-shadow: inset 0 0 0 1px var(--line);
+}
+.panel-cert {
+  width: min(300px, 100%);
+}
 .focus {
   width: min(1120px, 100% - 48px);
   margin: 0 auto;

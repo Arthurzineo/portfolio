@@ -5,9 +5,12 @@
  * No WebGL, no motion dependency. This is also what the server renders, so the
  * content is in the HTML for crawlers and for browsers without JavaScript.
  */
+import { lazy, Suspense } from "react";
 import { areaById, courses, profile, projects, type Lang } from "@/content/portfolio";
 import type { UI } from "@/content/ui";
-import { CareerAxis, CertList, Decrypted, Education, ProjectGallery, ResearchBlock, RoleList, Tags, type OpenImage } from "../content/blocks";
+import { CareerAxis, CertCards, Decrypted, Education, ProjectGallery, ResearchBlock, RoleList, Tags, type OpenImage } from "../content/blocks";
+
+const ProfileCard = lazy(() => import("@/components/reactbits/ProfileCard"));
 
 type Props = { lang: Lang; t: UI; webgl: boolean; hydrated: boolean; onOpenImage: OpenImage };
 
@@ -20,7 +23,9 @@ export function FocusMode({ lang, t, webgl, hydrated, onOpenImage }: Props) {
         <div>
           <h1 id="focus-name">{profile.name}</h1>
           <p className="focus-role">{profile.role[lang]}</p>
-          <p className="lede">{profile.intro[lang]}</p>
+          <p className="lede">
+            <Decrypted text={profile.intro[lang]} />
+          </p>
           <ul className="signals">
             {profile.signals.map((s) => (
               <li key={s.en}>{s[lang]}</li>
@@ -34,13 +39,33 @@ export function FocusMode({ lang, t, webgl, hydrated, onOpenImage }: Props) {
             <a href="#contato">{t.contact}</a>
           </nav>
         </div>
-        <img src={profile.portraits.standing} alt={profile.portraitAlt[lang]} width={960} height={1200} loading="lazy" />
+        <div className="focus-profile">
+          <Suspense fallback={<img src={profile.portraits.standing} alt={profile.portraitAlt[lang]} width={960} height={1200} />}>
+            <ProfileCard
+              avatarUrl={profile.portraits.standing}
+              miniAvatarUrl={profile.portraits.headshot}
+              name={profile.name}
+              title={profile.role[lang]}
+              handle={profile.handle}
+              status=""
+              contactText="LinkedIn"
+              onContactClick={() => window.open(profile.contact.linkedin, "_blank", "noopener,noreferrer")}
+              backdropColor="#0c121b"
+              radius={10}
+              holo={0.55}
+              glare={0.4}
+              tiltStrength={9}
+            />
+          </Suspense>
+        </div>
       </section>
 
       <section id="projetos" aria-labelledby="focus-projects">
         <header className="focus-head">
           <h2 id="focus-projects">{t.projects}</h2>
-          <p>{areaById.projects.summary[lang]}</p>
+          <p>
+            <Decrypted text={areaById.projects.summary[lang]} />
+          </p>
         </header>
         <div className="focus-projects">
           {projects.map((project) => (
@@ -70,23 +95,27 @@ export function FocusMode({ lang, t, webgl, hydrated, onOpenImage }: Props) {
       <section id="experiencia" aria-labelledby="focus-experience">
         <header className="focus-head">
           <h2 id="focus-experience">{t.experience}</h2>
-          <p>{areaById.experience.summary[lang]}</p>
+          <p>
+            <Decrypted text={areaById.experience.summary[lang]} />
+          </p>
         </header>
         <div className="focus-split">
           <div>
             <CareerAxis lang={lang} />
             <Education lang={lang} t={t} />
           </div>
-          <RoleList lang={lang} />
+          <RoleList lang={lang} decrypt />
         </div>
       </section>
 
       <section id="certificacoes" aria-labelledby="focus-certs">
         <header className="focus-head">
           <h2 id="focus-certs">{t.certifications}</h2>
-          <p>{areaById.certifications.summary[lang]}</p>
+          <p>
+            <Decrypted text={areaById.certifications.summary[lang]} />
+          </p>
         </header>
-        <CertList t={t} />
+        <CertCards t={t} />
         <div className="focus-courses">
           <h3>{t.courses}</h3>
           <ul>
@@ -102,7 +131,9 @@ export function FocusMode({ lang, t, webgl, hydrated, onOpenImage }: Props) {
       <section id="pesquisa" aria-labelledby="focus-research">
         <header className="focus-head">
           <h2 id="focus-research">{t.research}</h2>
-          <p>{areaById.research.summary[lang]}</p>
+          <p>
+            <Decrypted text={areaById.research.summary[lang]} />
+          </p>
         </header>
         <ResearchBlock lang={lang} t={t} />
       </section>
@@ -111,11 +142,16 @@ export function FocusMode({ lang, t, webgl, hydrated, onOpenImage }: Props) {
         <img src={profile.portraits.monitors} alt="" width={960} height={1200} loading="lazy" />
         <div>
           <h2 id="focus-contact">{t.contactTitle}</h2>
-          <p>{profile.contact.text[lang]}</p>
+          <p>
+            <Decrypted text={profile.contact.text[lang]} />
+          </p>
           <a className="action" href={profile.contact.linkedin} target="_blank" rel="noreferrer">
             {t.linkedin}
           </a>
-          <p className="quiet">{profile.motto}</p>
+          <blockquote className="motto">
+            <p>“{profile.motto}”</p>
+            <cite>{profile.mottoAuthor}</cite>
+          </blockquote>
         </div>
       </section>
     </main>

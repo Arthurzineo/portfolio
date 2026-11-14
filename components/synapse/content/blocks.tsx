@@ -6,8 +6,12 @@
  */
 import DecryptedText from "@/components/reactbits/DecryptedText";
 import FuzzyText from "@/components/reactbits/FuzzyText";
-import { certifications, education, experience, research, type Lang, type Project } from "@/content/portfolio";
+import { lazy, Suspense } from "react";
+import { certifications, education, experience, issuerOf, research, type Certification, type Lang, type Project } from "@/content/portfolio";
 import type { UI } from "@/content/ui";
+
+const TiltedCard = lazy(() => import("@/components/reactbits/TiltedCard"));
+const ReflectiveCard = lazy(() => import("@/components/reactbits/ReflectiveCard"));
 
 export type OpenImage = (project: Project, index: number) => void;
 
@@ -27,9 +31,64 @@ export function ProjectGallery({ project, lang, t, onOpen }: { project: Project;
     <ul className="gallery" aria-label={t.gallery} data-count={Math.min(project.images.length, 2)}>
       {project.images.map((image, index) => (
         <li key={image.src}>
-          <button type="button" onClick={() => onOpen(project, index)} aria-label={`${t.enlarge}: ${image.alt[lang]}`}>
-            <img src={image.src} alt={image.alt[lang]} loading="lazy" decoding="async" />
-          </button>
+          {/* The plain image shows until the tilt card loads, and stays if it never does. */}
+          <Suspense fallback={<img src={image.src} alt={image.alt[lang]} loading="lazy" decoding="async" />}>
+            <TiltedCard
+              imageSrc={image.src}
+              altText={`${t.enlarge}: ${image.alt[lang]}`}
+              containerWidth="100%"
+              containerHeight="100%"
+              imageWidth="100%"
+              imageHeight="100%"
+              radius={4}
+              rotateAmplitude={9}
+              scaleOnHover={1.04}
+              glare={0.35}
+              shadow={0.4}
+              showTooltip={false}
+              intro={false}
+              onClick={() => onOpen(project, index)}
+            />
+          </Suspense>
+        </li>
+      ))}
+    </ul>
+  );
+}
+
+/** One certification as a reflective ID-style card. The camera is never requested. */
+export function CertCard({ cert, t }: { cert: Certification; t: UI }) {
+  const done = cert.status === "done";
+  return (
+    <Suspense fallback={<div className="cert-card-fallback" />}>
+      <ReflectiveCard
+        name={cert.name}
+        role={cert.detail}
+        badge={done ? t.certified : ""}
+        status={done ? t.done : t.progress}
+        statusColor={done ? "#64E4DC" : "#9DADBF"}
+        idLabel={t.issuer}
+        idValue={issuerOf(cert)}
+        webcam={false}
+        tint={done ? "#bfeeee" : "#8f9bb0"}
+        roughness={done ? 0.28 : 0.6}
+        shine={done ? 1 : 0.4}
+        width="100%"
+        height={360}
+        radius={10}
+        tiltStrength={9}
+        intro={false}
+      />
+    </Suspense>
+  );
+}
+
+export function CertCards({ t }: { t: UI }) {
+  return (
+    <ul className="cert-cards">
+      {certifications.map((cert) => (
+        <li key={cert.id}>
+          <CertCard cert={cert} t={t} />
         </li>
       ))}
     </ul>
@@ -67,7 +126,7 @@ export function CareerAxis({ lang }: { lang: Lang }) {
   );
 }
 
-export function RoleList({ lang }: { lang: Lang }) {
+export function RoleList({ lang, decrypt = false }: { lang: Lang; decrypt?: boolean }) {
   return (
     <ol className="roles" reversed>
       {experience.map((role) => (
@@ -75,7 +134,7 @@ export function RoleList({ lang }: { lang: Lang }) {
           <p className="role-period">{role.period[lang]}</p>
           <h3>{role.role[lang]}</h3>
           <p className="role-org">{role.org[lang]}</p>
-          <p>{role.description[lang]}</p>
+          <p>{decrypt ? <Decrypted text={role.description[lang]} /> : role.description[lang]}</p>
         </li>
       ))}
     </ol>

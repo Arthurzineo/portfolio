@@ -25,6 +25,8 @@ export type NeuralSceneProps = {
   labels: RefObject<Map<NodeId, HTMLElement>>;
   /** Called once if the device cannot hold the frame rate, so the shell can drop its decorative layers too. */
   onSlow?: () => void;
+  /** Background use (Focus Mode): no labels, no hit targets, and the camera drifts with page scroll. */
+  ambient?: boolean;
 };
 
 type Quality = "high" | "low";
@@ -295,7 +297,7 @@ function cameraPose(selection: Selection, aspect: number) {
 }
 
 /** Moves the camera, positions the HTML labels, and watches frame time. */
-function Rig({ selection, reduced, shift, lift, labels, glow, clockRef, onSlow }: Pick<NeuralSceneProps, "selection" | "reduced" | "shift" | "lift" | "labels"> & { glow: GlowBuffer; clockRef: RefObject<number>; onSlow: () => void }) {
+function Rig({ selection, reduced, shift, lift, labels, glow, clockRef, ambient, onSlow }: Pick<NeuralSceneProps, "selection" | "reduced" | "shift" | "lift" | "labels" | "ambient"> & { glow: GlowBuffer; clockRef: RefObject<number>; onSlow: () => void }) {
   const size = useThree((s) => s.size);
   const pose = useMemo(() => cameraPose(selection, size.width / size.height), [selection, size.width, size.height]);
   const position = useRef(new THREE.Vector3(0, 0.1, 6));
@@ -303,6 +305,7 @@ function Rig({ selection, reduced, shift, lift, labels, glow, clockRef, onSlow }
   const offset = useRef({ x: 0, y: 0 });
   const frames = useRef({ count: 0, total: 0, reported: false });
   const scratch = useRef(new THREE.Vector3());
+  const target = useRef(new THREE.Vector3());
 
   useFrame((state, dt) => {
     const camera = state.camera as THREE.PerspectiveCamera;
@@ -314,13 +317,21 @@ function Rig({ selection, reduced, shift, lift, labels, glow, clockRef, onSlow }
     const charging = !reduced && t < CHARGE;
     const k = reduced ? 1 : charging ? 0 : 1 - Math.exp(-dt * 2.8);
     const ko = charging ? 1 : k;
-    position.current.lerp(pose.position, k);
+    if (ambient) {
+      // Orbit slowly as the page scrolls, so the background has real parallax behind the content.
+      const a = window.scrollY * 0.0007;
+      const r = pose.position.z + 3;
+      target.current.set(Math.sin(a) * r, 1.2 - window.scrollY * 0.0009, Math.cos(a) * r);
+      position.current.lerp(target.current, k);
+    } else {
+      position.current.lerp(pose.position, k);
+    }
     look.current.lerp(pose.look, k);
     offset.current.x += (shift * state.size.width - offset.current.x) * ko;
     offset.current.y += (lift * state.size.height - offset.current.y) * ko;
 
     camera.position.copy(position.current);
-    if (!reduced) {
+    if (!reduced && !ambient) {
       camera.position.x += state.pointer.x * 0.35;
       camera.position.y += state.pointer.y * 0.22;
     }
@@ -367,14 +378,14 @@ function Rig({ selection, reduced, shift, lift, labels, glow, clockRef, onSlow }
 }
 
 export default function NeuralScene(props: NeuralSceneProps) {
-  const { selection, hovered, reduced, compact } = props;
+  const { selection, hovered, reduced, compact, ambient = false } = props;
   const [quality, setQuality] = useState<Quality>("high");
   const { nodeState, edgeState } = useMemo(() => visualStates(selection, hovered), [selection, hovered]);
   const edgeLevel = useMemo(() => Object.fromEntries(Object.entries(edgeState).map(([id, s]) => [id, STATE_LEVEL[s]])), [edgeState]);
   const clock = useRef(0);
   const shared = useMemo<Shared>(
-    () => ({ reduced, density: quality === "low" ? 0.5 : compact ? 0.75 : 1, clock }),
-    [reduced, quality, compact],
+    () => ({ reduced, density: quality === "low" ? 0.5 : compact || ambient ? 0.75 : 1, clock }),
+    [reduced, quality, compact, ambient],
   );
 
   const levels = useMemo(() => nodes.map((n) => STATE_LEVEL[nodeState[n.id]]), [nodeState]);
@@ -383,12 +394,12 @@ export default function NeuralScene(props: NeuralSceneProps) {
   return (
     <Canvas
       camera={{ fov: 42, near: 0.1, far: 80, position: [0, 0.1, 6] }}
-      dpr={quality === "low" ? 1 : [1, 1.75]}
+      dpr={quality === "low" || props.ambient ? 1 : [1, 1.75]}
       frameloop={reduced ? "demand" : "always"}
       gl={{ antialias: false, alpha: true, powerPreference: "high-performance" }}
       aria-hidden="true"
     >
-      <Rig selection={selection} reduced={reduced} shift={props.shift} lift={props.lift} labels={props.labels} glow={glow} clockRef={clock} onSlow={() => {
+      <Rig selection={selection} reduced={reduced} shift={props.shift} lift={props.lift} labels={props.labels} glow={glow} clockRef={clock} ambient={props.ambient} onSlow={() => {
           setQuality("low");
           props.onSlow?.();
         }}
@@ -400,7 +411,7 @@ export default function NeuralScene(props: NeuralSceneProps) {
         {nodes.map((node) => (
           <Soma key={node.id} node={node} level={STATE_LEVEL[nodeState[node.id]]} shared={shared} />
         ))}
-        <HitTargets onHover={props.onHover} onSelect={props.onSelect} />
+        {props.ambient ? null : <HitTargets onHover={props.onHover} onSelect={props.onSelect} />}
       </Burst>
     </Canvas>
   );

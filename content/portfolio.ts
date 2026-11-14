@@ -26,12 +26,14 @@ export type ProjectId = "ksc-receiver" | "inoichi" | "recon-automation" | "web-a
 
 export const profile = {
   name: "Arthur Gonçalves",
+  handle: "Dr4g0nR00t",
   role: { pt: "Security Engineering e AI Security", en: "Security Engineering and AI Security" } as Loc,
   intro: {
     pt: "Construo defesas, automações e sistemas inteligentes para ambientes reais.",
     en: "I build defenses, automation, and intelligent systems for real-world environments.",
   } as Loc,
   motto: "Security is a process, not a product.",
+  mottoAuthor: "Bruce Schneier",
   signals: [
     { pt: "Detecção e automação", en: "Detection and automation" },
     { pt: "SIEM e EDR", en: "SIEM and EDR" },
@@ -247,7 +249,7 @@ export const areaLinks: readonly { a: AreaId; b: AreaId; why: Loc }[] = [
   { a: "experience", b: "security", why: { pt: "Segurança de endpoints e SIEM/EDR no dia a dia da UCS.", en: "Endpoint security and SIEM/EDR in day-to-day work at UCS." } },
   { a: "experience", b: "infrastructure", why: { pt: "Administração de Windows, Linux e redes desde 2022.", en: "Windows, Linux, and network administration since 2022." } },
   { a: "certifications", b: "security", why: { pt: "CySA+, PenTest+, Security+ e Sophos Engineer.", en: "CySA+, PenTest+, Security+, and Sophos Engineer." } },
-  { a: "certifications", b: "ai-security", why: { pt: "CompTIA SecAI+, em preparação.", en: "CompTIA SecAI+, in progress." } },
+  { a: "certifications", b: "ai-security", why: { pt: "CompTIA SecAI+.", en: "CompTIA SecAI+." } },
 ];
 
 export type Degree = { id: "software-engineering"; name: Loc; detail: Loc };
@@ -338,14 +340,16 @@ export const experience: readonly Role[] = [
 
 export type CertId = "cysa" | "pentest" | "security-plus" | "sophos" | "secai" | "securityx";
 export type Certification = { id: CertId; name: string; detail: string; status: "done" | "progress" };
+/** The issuer is the first word of the certification name (CompTIA, Sophos). */
+export const issuerOf = (cert: Certification) => cert.name.split(" ")[0];
 
-// review: statuses carried over from the previous site; confirm the two in progress.
+// SecAI+ confirmed as completed by the owner on 2026-11-14. review: SecurityX still in progress?
 export const certifications: readonly Certification[] = [
   { id: "cysa", name: "CompTIA CySA+", detail: "Cybersecurity Analyst", status: "done" },
   { id: "pentest", name: "CompTIA PenTest+", detail: "Penetration Testing", status: "done" },
   { id: "security-plus", name: "CompTIA Security+", detail: "Security Foundations", status: "done" },
   { id: "sophos", name: "Sophos Engineer", detail: "Endpoint & Network Security", status: "done" },
-  { id: "secai", name: "CompTIA SecAI+", detail: "AI Security", status: "progress" },
+  { id: "secai", name: "CompTIA SecAI+", detail: "AI Security", status: "done" },
   { id: "securityx", name: "CompTIA SecurityX", detail: "Advanced Security Architecture", status: "progress" },
 ];
 

@@ -55,11 +55,11 @@ const projectsCenter = AREA_POSITIONS.projects;
 /** Items that orbit an area. Only completed certifications become nodes; the ones in progress stay in the panel list. */
 export type Item = { id: ItemId; parent: AreaId; title: Record<"pt" | "en", string>; detail: Loc; status?: "done" | "progress"; angle: number };
 const same = (text: string) => ({ pt: text, en: text });
-const CERT_ANGLES = [78, 140, 204, 262];
+const CERT_ANGLES = [72, 126, 180, 234, 288];
 export const items: readonly Item[] = [
   ...certifications
     .filter((c) => c.status === "done")
-    .map((c, i): Item => ({ id: c.id, parent: "certifications", title: same(c.name), detail: same(c.detail), status: c.status, angle: CERT_ANGLES[i % 4] })),
+    .map((c, i): Item => ({ id: c.id, parent: "certifications", title: same(c.name), detail: same(c.detail), status: c.status, angle: CERT_ANGLES[i % CERT_ANGLES.length] })),
   ...courses.map((c, i): Item => ({ id: c.id, parent: "courses", title: same(c.name), detail: c.detail, angle: 95 + i * 80 })),
   ...degrees.map((d, i): Item => ({ id: d.id, parent: "education", title: d.name, detail: d.detail, angle: 150 + i * 80 })),
 ];
