@@ -1,0 +1,2 @@
+/** Runs before first paint (inlined in <head>): chooses mode and language. */
+export const bootScript = `(function(){var d=document.documentElement;try{var m=localStorage.getItem('synapse-mode');var c=document.createElement('canvas');var ok=!!(c.getContext('webgl2')||c.getContext('webgl'));var r=matchMedia('(prefers-reduced-motion: reduce)').matches;d.dataset.webgl=ok?'1':'0';d.dataset.mode=(m==='focus'||!ok||(!m&&r))?'focus':'neural';var l=localStorage.getItem('synapse-lang');if(l==='en')d.lang='en';}catch(e){d.dataset.mode='focus';}})();`;
