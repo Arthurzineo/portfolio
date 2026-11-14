@@ -74,7 +74,11 @@ Project screenshots are unchanged.
 ## Owner review before publishing
 
 - Certification status of SecurityX ("in progress"). SecAI+ was confirmed completed on 2026-11-14.
-- Certification cards show text only. Official badge artwork was not available and is not recreated here.
+- Certification cards are tinted per issuer (red for CompTIA, blue for Sophos) and show text. To add the
+  official badge, put the file in `public/badges/` and set `badge` on the entry in `content/portfolio.ts`.
+  Logos are not redrawn in code.
+- Research section and the Web Attack Detection project, rewritten on 2026-11-14 around generalization of
+  SQL Injection detection (five datasets, leave-one-dataset-out). The metrics line is carried over from the old site.
 - Expected graduation "2026" and the OpenRMF release window.
 - Connection reasons written for this redesign (`links[].why`, `areaLinks`) – confirm each is accurate.
 

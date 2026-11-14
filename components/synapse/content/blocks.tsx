@@ -6,16 +6,34 @@
  */
 import DecryptedText from "@/components/reactbits/DecryptedText";
 import FuzzyText from "@/components/reactbits/FuzzyText";
-import { lazy, Suspense } from "react";
-import { certifications, education, experience, issuerOf, research, type Certification, type Lang, type Project } from "@/content/portfolio";
+import React, { lazy, Suspense } from "react";
+import {
+  certifications,
+  education,
+  experience,
+  ISSUER_TINT,
+  issuerOf,
+  research,
+  type Certification,
+  type Lang,
+  type Project,
+} from "@/content/portfolio";
 import type { UI } from "@/content/ui";
 
 const TiltedCard = lazy(() => import("@/components/reactbits/TiltedCard"));
-const ReflectiveCard = lazy(() => import("@/components/reactbits/ReflectiveCard"));
+const ReflectiveCard = lazy(
+  () => import("@/components/reactbits/ReflectiveCard"),
+);
 
 export type OpenImage = (project: Project, index: number) => void;
 
-export function Tags({ tags, label }: { tags: readonly string[]; label: string }) {
+export function Tags({
+  tags,
+  label,
+}: {
+  tags: readonly string[];
+  label: string;
+}) {
   return (
     <ul className="tags" aria-label={label}>
       {tags.map((tag) => (
@@ -25,14 +43,37 @@ export function Tags({ tags, label }: { tags: readonly string[]; label: string }
   );
 }
 
-export function ProjectGallery({ project, lang, t, onOpen }: { project: Project; lang: Lang; t: UI; onOpen: OpenImage }) {
+export function ProjectGallery({
+  project,
+  lang,
+  t,
+  onOpen,
+}: {
+  project: Project;
+  lang: Lang;
+  t: UI;
+  onOpen: OpenImage;
+}) {
   if (project.images.length === 0) return null;
   return (
-    <ul className="gallery" aria-label={t.gallery} data-count={Math.min(project.images.length, 2)}>
+    <ul
+      className="gallery"
+      aria-label={t.gallery}
+      data-count={Math.min(project.images.length, 2)}
+    >
       {project.images.map((image, index) => (
         <li key={image.src}>
           {/* The plain image shows until the tilt card loads, and stays if it never does. */}
-          <Suspense fallback={<img src={image.src} alt={image.alt[lang]} loading="lazy" decoding="async" />}>
+          <Suspense
+            fallback={
+              <img
+                src={image.src}
+                alt={image.alt[lang]}
+                loading="lazy"
+                decoding="async"
+              />
+            }
+          >
             <TiltedCard
               imageSrc={image.src}
               altText={`${t.enlarge}: ${image.alt[lang]}`}
@@ -59,27 +100,36 @@ export function ProjectGallery({ project, lang, t, onOpen }: { project: Project;
 /** One certification as a reflective ID-style card. The camera is never requested. */
 export function CertCard({ cert, t }: { cert: Certification; t: UI }) {
   const done = cert.status === "done";
+  const tint = ISSUER_TINT[issuerOf(cert)] ?? "#bfeeee";
   return (
-    <Suspense fallback={<div className="cert-card-fallback" />}>
-      <ReflectiveCard
-        name={cert.name}
-        role={cert.detail}
-        badge={done ? t.certified : ""}
-        status={done ? t.done : t.progress}
-        statusColor={done ? "#64E4DC" : "#9DADBF"}
-        idLabel={t.issuer}
-        idValue={issuerOf(cert)}
-        webcam={false}
-        tint={done ? "#bfeeee" : "#8f9bb0"}
-        roughness={done ? 0.28 : 0.6}
-        shine={done ? 1 : 0.4}
-        width="100%"
-        height={360}
-        radius={10}
-        tiltStrength={9}
-        intro={false}
-      />
-    </Suspense>
+    <div
+      className="cert-card"
+      style={{ "--issuer": tint } as React.CSSProperties}
+    >
+      <Suspense fallback={<div className="cert-card-fallback" />}>
+        <ReflectiveCard
+          name={cert.name}
+          role={cert.detail}
+          badge={done ? t.certified : ""}
+          status={done ? t.done : t.progress}
+          statusColor={done ? "#64E4DC" : "#9DADBF"}
+          idLabel={t.issuer}
+          idValue={issuerOf(cert)}
+          webcam={false}
+          tint={done ? tint : "#8f9bb0"}
+          roughness={done ? 0.28 : 0.6}
+          shine={done ? 1 : 0.4}
+          width="100%"
+          height={360}
+          radius={10}
+          tiltStrength={9}
+          intro={false}
+        />
+      </Suspense>
+      {cert.badge ? (
+        <img className="cert-badge" src={cert.badge} alt="" loading="lazy" />
+      ) : null}
+    </div>
   );
 }
 
@@ -102,7 +152,15 @@ export function CareerAxis({ lang }: { lang: Lang }) {
   const span = last - first;
   const rows = [...experience].reverse();
   return (
-    <div className="career-axis" role="img" aria-label={lang === "pt" ? "Linha do tempo de 2021 até hoje" : "Timeline from 2021 to today"}>
+    <div
+      className="career-axis"
+      role="img"
+      aria-label={
+        lang === "pt"
+          ? "Linha do tempo de 2021 até hoje"
+          : "Timeline from 2021 to today"
+      }
+    >
       <div className="career-years" aria-hidden="true">
         {Array.from({ length: span }, (_, i) => (
           <span key={i}>{first + i}</span>
@@ -110,13 +168,21 @@ export function CareerAxis({ lang }: { lang: Lang }) {
       </div>
       {rows.map((role) => {
         // Year granularity only: the source data has no months, so a single-year role fills that year.
-        const end = role.end === null ? last : role.end === role.start ? role.start + 1 : role.end;
+        const end =
+          role.end === null
+            ? last
+            : role.end === role.start
+              ? role.start + 1
+              : role.end;
         return (
           <div className="career-row" key={role.id} aria-hidden="true">
             <span
               className="career-bar"
               data-current={role.end === null}
-              style={{ marginLeft: `${((role.start - first) / span) * 100}%`, width: `${((end - role.start) / span) * 100}%` }}
+              style={{
+                marginLeft: `${((role.start - first) / span) * 100}%`,
+                width: `${((end - role.start) / span) * 100}%`,
+              }}
             />
             <span className="career-name">{role.role[lang]}</span>
           </div>
@@ -126,7 +192,13 @@ export function CareerAxis({ lang }: { lang: Lang }) {
   );
 }
 
-export function RoleList({ lang, decrypt = false }: { lang: Lang; decrypt?: boolean }) {
+export function RoleList({
+  lang,
+  decrypt = false,
+}: {
+  lang: Lang;
+  decrypt?: boolean;
+}) {
   return (
     <ol className="roles" reversed>
       {experience.map((role) => (
@@ -134,7 +206,13 @@ export function RoleList({ lang, decrypt = false }: { lang: Lang; decrypt?: bool
           <p className="role-period">{role.period[lang]}</p>
           <h3>{role.role[lang]}</h3>
           <p className="role-org">{role.org[lang]}</p>
-          <p>{decrypt ? <Decrypted text={role.description[lang]} /> : role.description[lang]}</p>
+          <p>
+            {decrypt ? (
+              <Decrypted text={role.description[lang]} />
+            ) : (
+              role.description[lang]
+            )}
+          </p>
         </li>
       ))}
     </ol>
@@ -152,17 +230,42 @@ export function Education({ lang, t }: { lang: Lang; t: UI }) {
 
 /** A project summary that resolves from scrambled characters the first time it scrolls into view. */
 export function Decrypted({ text }: { text: string }) {
-  return <DecryptedText text={text} animateOn="view" sequential revealDirection="start" speed={14} maxIterations={8} useOriginalCharsOnly />;
+  return (
+    <DecryptedText
+      text={text}
+      animateOn="view"
+      sequential
+      revealDirection="start"
+      speed={14}
+      maxIterations={8}
+      useOriginalCharsOnly
+    />
+  );
 }
 
 /** "In progress" is drawn fuzzy on purpose: it is not settled yet. Completed stays crisp. */
-export function CertStatus({ status, t }: { status: "done" | "progress"; t: UI }) {
+export function CertStatus({
+  status,
+  t,
+}: {
+  status: "done" | "progress";
+  t: UI;
+}) {
   if (status === "done") return <span className="cert-status">{t.done}</span>;
   return (
     <span className="cert-status">
       <span className="sr-only">{t.progress}</span>
       <span aria-hidden="true" className="fuzzy">
-        <FuzzyText fontSize={13} fontWeight={500} fontFamily="'Archivo Variable', sans-serif" color="#9dadbf" baseIntensity={0.16} hoverIntensity={0.45} fuzzRange={6} fps={30}>
+        <FuzzyText
+          fontSize={13}
+          fontWeight={500}
+          fontFamily="'Archivo Variable', sans-serif"
+          color="#9dadbf"
+          baseIntensity={0.16}
+          hoverIntensity={0.45}
+          fuzzRange={6}
+          fps={30}
+        >
           {t.progress}
         </FuzzyText>
       </span>
@@ -189,14 +292,16 @@ export function CertList({ t }: { t: UI }) {
 export function ResearchBlock({ lang, t }: { lang: Lang; t: UI }) {
   return (
     <div className="research">
-      <h3>{t.paper}</h3>
-      <p className="paper-title">{research.paperTitle}</p>
-      <h3>{t.pipeline}</h3>
+      <p className="paper-title">{research.focus[lang]}</p>
+      <h3>
+        {t.pipeline} ({research.protocolName})
+      </h3>
       <ol className="pipeline">
-        {research.pipeline.map((step) => (
-          <li key={step}>{step}</li>
+        {research.protocol.map((step) => (
+          <li key={step.en}>{step[lang]}</li>
         ))}
       </ol>
+      <p>{research.datasets[lang]}</p>
       <p>{research.metrics[lang]}</p>
       <p className="quiet">{research.publication[lang]}</p>
     </div>

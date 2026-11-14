@@ -70,8 +70,8 @@ export const areas: readonly Area[] = [
     id: "ai",
     name: "Artificial Intelligence",
     summary: {
-      pt: "IA aplicada a problemas de segurança: pipelines assistidos por IA, representações produzidas por Transformers e orquestração de agentes.",
-      en: "AI applied to security problems: AI-assisted pipelines, Transformer-generated representations, and agent orchestration.",
+      pt: "IA aplicada a problemas de segurança: pipelines assistidos por IA, detecção de ataques com machine learning e orquestração de agentes.",
+      en: "AI applied to security problems: AI-assisted pipelines, machine-learning attack detection, and agent orchestration.",
     },
   },
   {
@@ -86,8 +86,8 @@ export const areas: readonly Area[] = [
     id: "research",
     name: "Research",
     summary: {
-      pt: "Pesquisa de TCC que combina representações de payloads HTTP produzidas por Transformers com classificadores-base e um metaclassificador em stacking para detectar SQL Injection e Cross-Site Scripting.",
-      en: "Undergraduate research combining Transformer-generated HTTP payload representations with base classifiers and a stacking meta-classifier to detect SQL Injection and Cross-Site Scripting.",
+      pt: "Pesquisa de TCC sobre generalização na detecção de SQL Injection com machine learning: detectores treinados em algumas bases de dados são avaliados em bases que nunca viram.",
+      en: "Undergraduate research on generalization in machine-learning detection of SQL Injection: detectors trained on some datasets are evaluated on datasets they have never seen.",
     },
   },
   {
@@ -209,15 +209,15 @@ export const projects: readonly Project[] = [
     id: "web-attack-detection",
     title: "Web Attack Detection",
     description: {
-      pt: "Abordagem de stacking ensemble com extração de características baseada em Transformers para detecção de SQLi e XSS.",
-      en: "A stacking ensemble approach with Transformer-based feature extraction for SQLi and XSS detection.",
+      pt: "Estudo de generalização na detecção de SQL Injection com machine learning: treina detectores em um conjunto de bases e mede o desempenho em bases nunca vistas.",
+      en: "A study of generalization in machine-learning detection of SQL Injection: detectors are trained on a set of datasets and measured on datasets never seen.",
     },
-    tags: ["Machine Learning", "Transformers", "SQLi", "XSS"],
+    tags: ["Machine Learning", "SQL Injection", "Generalization", "Leave-one-dataset-out"],
     images: [],
     links: [
       { area: "research", why: { pt: "É o tema da pesquisa de TCC.", en: "It is the subject of the undergraduate research." } },
-      { area: "ai", why: { pt: "Usa Transformers e um metaclassificador em stacking.", en: "Uses Transformers and a stacking meta-classifier." } },
-      { area: "security", why: { pt: "Detecta SQL Injection e Cross-Site Scripting.", en: "Detects SQL Injection and Cross-Site Scripting." } },
+      { area: "ai", why: { pt: "Treina e avalia detectores com machine learning.", en: "Trains and evaluates detectors with machine learning." } },
+      { area: "security", why: { pt: "Detecta ataques de SQL Injection.", en: "Detects SQL Injection attacks." } },
     ],
   },
   {
@@ -339,7 +339,16 @@ export const experience: readonly Role[] = [
 ];
 
 export type CertId = "cysa" | "pentest" | "security-plus" | "sophos" | "secai" | "securityx";
-export type Certification = { id: CertId; name: string; detail: string; status: "done" | "progress" };
+export type Certification = {
+  id: CertId;
+  name: string;
+  detail: string;
+  status: "done" | "progress";
+  /** Path under /public to the official badge file issued to the holder (for example from Credly). Optional. */
+  badge?: string;
+};
+/** Card tint per issuer: a colour cue only. Logos come from the official badge files, never redrawn here. */
+export const ISSUER_TINT: Record<string, string> = { CompTIA: "#ff5a5f", Sophos: "#4d8dff" };
 /** The issuer is the first word of the certification name (CompTIA, Sophos). */
 export const issuerOf = (cert: Certification) => cert.name.split(" ")[0];
 
@@ -359,10 +368,24 @@ export const education: Loc = {
   en: "Software Engineering, UCS. Expected graduation in 2026.",
 };
 
+// review: rewritten on 2026-11-14 from what the owner said about the current scope of the thesis.
+// The old paper title and the stacking pipeline were removed because the thesis changed focus.
 export const research = {
-  paperTitle:
-    "A Stacking Ensemble Approach with Transformer-Based Feature Extraction for Detecting SQL Injection and Cross-Site Scripting in HTTP Traffic",
-  pipeline: ["Transformer Encoder", "CLS Embeddings", "Base Classifiers", "OOF Predictions", "Meta-classifier"],
+  focus: {
+    pt: "A pergunta central é se um detector de SQL Injection continua funcionando fora dos dados em que foi treinado.",
+    en: "The central question is whether a SQL Injection detector keeps working outside the data it was trained on.",
+  } as Loc,
+  datasets: {
+    pt: "Cinco bases: três externas, uma real coletada por mim e uma sintética, gerada simulando ataques em laboratório próprio.",
+    en: "Five datasets: three external, one real dataset I collected, and one synthetic, generated by simulating attacks in my own lab.",
+  } as Loc,
+  protocol: [
+    { pt: "Reunir as cinco bases de dados", en: "Gather the five datasets" },
+    { pt: "Treinar o detector em quatro delas", en: "Train the detector on four of them" },
+    { pt: "Testar na base que ficou de fora", en: "Test on the one left out" },
+    { pt: "Repetir até cada base ter sido a de teste", en: "Repeat until each dataset has been the test set" },
+  ] as readonly Loc[],
+  protocolName: "leave-one-dataset-out",
   metrics: {
     pt: "Avaliação orientada por precision, recall, F1-score e AUC-PR.",
     en: "Evaluation focused on precision, recall, F1-score, and AUC-PR.",
