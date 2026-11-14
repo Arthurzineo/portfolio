@@ -497,6 +497,15 @@ kbd {
 .connections button:hover {
   background: var(--graphite);
 }
+.connection-static {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 10px;
+}
+.connection-static .connection-name {
+  color: var(--ice);
+}
 .connection-name {
   font-weight: 600;
   font-stretch: 106%;

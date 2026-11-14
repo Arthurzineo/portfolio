@@ -4,7 +4,7 @@ import { itemById, items, neighbors, nodeById, nodeOf, type ItemId, type NodeId,
 import { areaById, certifications, profile, projectById, projects, type AreaId, type Lang, type ProjectId } from "@/content/portfolio";
 import type { UI } from "@/content/ui";
 import { lazy, Suspense } from "react";
-import { CareerAxis, CertCard, CertList, CertStatus, Decrypted, Education, ProjectGallery, ResearchBlock, RoleList, Tags, type OpenImage } from "../content/blocks";
+import { CareerAxis, CertCard, CertStatus, Decrypted, Education, ProjectGallery, ResearchBlock, RoleList, Tags, type OpenImage } from "../content/blocks";
 
 const Radar = lazy(() => import("@/components/reactbits/Radar"));
 
@@ -12,7 +12,10 @@ type Props = { selection: Selection; lang: Lang; t: UI; onSelect: (s: Selection)
 
 /** Other nodes this one is connected to, each with the documented reason. */
 function Connections({ id, lang, t, onSelect, only }: { id: NodeId; lang: Lang; t: UI; onSelect: Props["onSelect"]; only: "project" | "area" }) {
-  const list = neighbors(id).filter((n) => nodeById[n.id].kind === only && n.kind === "link");
+  // "area" also lists the parent area of an item (a branch edge), so every node shows where it hangs from.
+  const list = neighbors(id).filter(
+    (n) => nodeById[n.id].kind === only && (n.kind === "link" || (only === "area" && n.kind === "branch" && nodeById[id].kind === "item")),
+  );
   if (list.length === 0) return null;
   return (
     <section>
@@ -89,7 +92,7 @@ function AreaContent({ id, ...rest }: { id: AreaId } & Omit<Props, "selection">)
           <Education lang={lang} t={t} />
         </>
       ) : null}
-      {id === "certifications" ? <CertList t={t} /> : null}
+      {id === "certifications" ? <CertLinks t={t} onSelect={onSelect} /> : null}
       {id === "education" || id === "courses" ? <AreaItems id={id} lang={lang} onSelect={onSelect} /> : null}
       {id === "research" ? <ResearchBlock lang={lang} t={t} /> : null}
       <Connections id={id} lang={lang} t={t} onSelect={onSelect} only="project" />
@@ -135,6 +138,36 @@ function ItemContent({ id, lang, t, onSelect }: { id: ItemId } & Omit<Props, "se
       <Connections id={id} lang={lang} t={t} onSelect={onSelect} only="project" />
       <Connections id={id} lang={lang} t={t} onSelect={onSelect} only="area" />
     </>
+  );
+}
+
+/** Every certification: completed ones open their own node, the ones in progress are listed without a link. */
+function CertLinks({ t, onSelect }: { t: UI; onSelect: Props["onSelect"] }) {
+  return (
+    <ul className="connections cert-links">
+      {certifications.map((cert) => {
+        const row = (
+          <>
+            <span className="connection-name">{cert.name}</span>
+            <span className="connection-why">{cert.detail}</span>
+            <span data-status={cert.status}>
+              <CertStatus status={cert.status} t={t} />
+            </span>
+          </>
+        );
+        return (
+          <li key={cert.id}>
+            {cert.status === "done" ? (
+              <button type="button" onClick={() => onSelect(cert.id)}>
+                {row}
+              </button>
+            ) : (
+              <div className="connection-static">{row}</div>
+            )}
+          </li>
+        );
+      })}
+    </ul>
   );
 }
 
