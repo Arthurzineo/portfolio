@@ -47,21 +47,28 @@ const smooth = (t: number) => t * t * (3 - 2 * t);
 const clamp01 = (t: number) => Math.min(1, Math.max(0, t));
 
 /**
- * Opening sequence ("Neural Awakening"), in seconds from mount:
- * 0.0-0.7 every neuron is packed into one bright mass at the centre;
- * 0.7-2.3 the mass bursts outward to the authored positions, with a flash and a shockwave;
- * 0.9-2.8 neurons unfold and the connections trace out from their sources; labels fade in last.
+ * Opening sequence ("Neural Awakening"), in seconds from the first frame:
+ * 0.0-0.5 empty, while the top bar starts to enter;
+ * 0.5-1.2 the core fades in as one packed, bright mass;
+ * 1.2-2.8 it bursts outward to the authored positions, with a flash and a shockwave;
+ * 1.4-3.3 neurons unfold and the connections trace out; 2.7-3.5 names fade in, once everything has settled.
  * The whole graph scales uniformly from the origin, so filaments stay attached to their nodes throughout.
  */
-const CHARGE = 0.7;
-const INTRO_SECONDS = 3;
+/** Nothing is drawn for this long, so the interface has started to appear before the core does. */
+const LEAD = 0.5;
+/** The burst happens at this time. Before it, the core fades in and charges. */
+const CHARGE = LEAD + 0.7;
+const INTRO_SECONDS = 3.6;
 const intro = {
-  burst: (t: number) => (t < CHARGE ? 0.03 + 0.03 * (t / CHARGE) : 0.06 + 0.94 * (1 - Math.pow(2, -10 * clamp01((t - CHARGE) / 1.6)))),
-  bloom: (t: number) => 0.15 + 0.85 * smooth(clamp01((t - 0.9) / 1.6)),
-  trace: (t: number) => smooth(clamp01((t - 0.9) / 1.9)),
+  burst: (t: number) =>
+    t < CHARGE ? 0.06 * smooth(clamp01((t - LEAD) / (CHARGE - LEAD))) : 0.06 + 0.94 * (1 - Math.pow(2, -10 * clamp01((t - CHARGE) / 1.6))),
+  bloom: (t: number) => 0.15 + 0.85 * smooth(clamp01((t - CHARGE - 0.2) / 1.6)),
+  trace: (t: number) => smooth(clamp01((t - CHARGE - 0.2) / 1.9)),
+  glow: (t: number) => smooth(clamp01((t - LEAD) / 0.5)),
   shock: (t: number) => clamp01((t - CHARGE) / 1.5),
   flash: (t: number) => Math.exp(-Math.pow((t - CHARGE - 0.05) / 0.22, 2)),
-  labels: (t: number) => smooth(clamp01((t - 1.9) / 0.9)),
+  // Names wait until the burst has settled, so they never show while the nodes are still bunched together.
+  labels: (t: number) => smooth(clamp01((t - CHARGE - 1.5) / 0.8)),
 };
 
 function useColors() {
@@ -235,7 +242,7 @@ function Backdrop({ levels, glow, shared }: { levels: number[]; glow: GlowBuffer
     u.uTime.value = shared.reduced ? 0 : t;
     u.uCore.value.set(glow.current[0], glow.current[1]);
     u.uShock.value = shared.reduced ? 0 : intro.shock(t);
-    u.uGlow.value = shared.reduced ? 1 : 0.12 + 0.88 * intro.trace(t);
+    u.uGlow.value = shared.reduced ? 1 : intro.glow(t) * (0.12 + 0.88 * intro.trace(t));
     u.uFlash.value = shared.reduced ? 0 : intro.flash(t);
     u.uHeight.value = state.size.height * state.viewport.dpr;
   });
@@ -366,7 +373,7 @@ function Gestures({ viewRef, wheel, selection }: { viewRef: RefObject<View>; whe
 function Burst({ shared, children }: { shared: Shared; children: ReactNode }) {
   const group = useRef<THREE.Group>(null);
   useFrame(() => {
-    group.current?.scale.setScalar(shared.reduced ? 1 : intro.burst(shared.clock.current));
+    group.current?.scale.setScalar(shared.reduced ? 1 : Math.max(0.0001, intro.burst(shared.clock.current)));
   });
   return <group ref={group}>{children}</group>;
 }
