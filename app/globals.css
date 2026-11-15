@@ -99,14 +99,13 @@ html[data-mode="neural"] .focus-root {
 /* ------------------------------------------------------------------ entrance sequence
    One ordered opening instead of pieces popping in as they load. Everything below is paused in its starting
    state while html[data-boot="wait"], and runs when the scene draws its first frame (data-boot="ready"):
-   0.0s background · 0.2s top bar, left to right · 0.5s portrait card · 0.7s name and the core fading in ·
-   0.85s role · 0.95s intro · 1.05s buttons, one by one · 1.5s the core bursts · 3.0s node names (driven by the scene).
+   0.0s background · 0.2s top bar, left to right · 0.5s portrait card · 0.7s name · 0.85s role · 0.95s intro ·
+   1.0s the core fades in · 1.05s buttons, one by one · 1.7s the core bursts · 3.2s node names (driven by the scene).
    Without JavaScript there is no data-boot, so nothing is animated or hidden. */
 html[data-boot] .topbar > *,
 html[data-boot] .hero > img,
 html[data-boot] .hero-card,
 html[data-boot] .hero h1,
-html[data-boot] .hero-ascii,
 html[data-boot] .hero-role,
 html[data-boot] .hero-intro,
 html[data-boot] .hero-actions > *,
@@ -118,7 +117,6 @@ html[data-boot="ready"] .topbar > *,
 html[data-boot="ready"] .hero > img,
 html[data-boot="ready"] .hero-card,
 html[data-boot="ready"] .hero h1,
-html[data-boot="ready"] .hero-ascii,
 html[data-boot="ready"] .hero-role,
 html[data-boot="ready"] .hero-intro,
 html[data-boot="ready"] .hero-actions > *,
@@ -150,8 +148,7 @@ html[data-boot] .hero-card {
   animation-duration: 1000ms;
   animation-delay: 500ms;
 }
-html[data-boot] .hero h1,
-html[data-boot] .hero-ascii {
+html[data-boot] .hero h1 {
   animation-name: wipe-in;
   animation-duration: 1000ms;
   animation-delay: 700ms;
@@ -459,8 +456,18 @@ kbd {
   font-size: clamp(2.25rem, 3.9vw, 3.75rem);
 }
 /* When the ASCII rendering is on, the real heading stays in the DOM for assistive tech and reserves the space. */
+.hero h1 {
+  transition: color var(--dur-slow) ease-out;
+}
 .hero h1[data-ascii="true"] {
   color: transparent;
+}
+.hero-ascii > * {
+  opacity: 0;
+  transition: opacity var(--dur-slow) ease-out;
+}
+.hero-ascii[data-ready="true"] > * {
+  opacity: 1;
 }
 .hero > div {
   position: relative;

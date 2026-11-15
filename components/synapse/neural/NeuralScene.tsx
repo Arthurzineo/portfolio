@@ -48,17 +48,17 @@ const clamp01 = (t: number) => Math.min(1, Math.max(0, t));
 
 /**
  * Opening sequence ("Neural Awakening"), in seconds from the first frame:
- * 0.0-0.7 empty, while the top bar, the portrait and the name enter;
- * 0.7-1.5 the core fades in as one packed, bright mass;
- * 1.5-3.1 it bursts outward to the authored positions, with a flash and a shockwave;
- * 1.7-3.6 neurons unfold and the connections trace out; 3.0-3.8 names fade in, once everything has settled.
+ * 0.0-1.0 empty, while the top bar, the portrait, the name and the role enter;
+ * 1.0-1.7 the core fades in as one packed, bright mass;
+ * 1.7-3.3 it bursts outward to the authored positions, with a flash and a shockwave;
+ * 1.9-3.8 neurons unfold and the connections trace out; 3.2-4.0 names fade in, once everything has settled.
  * The whole graph scales uniformly from the origin, so filaments stay attached to their nodes throughout.
  */
 /** Nothing is drawn for this long, so the interface has started to appear before the core does. */
-const LEAD = 0.7;
+const LEAD = 1.0;
 /** The burst happens at this time. Before it, the core fades in and charges. */
-const CHARGE = LEAD + 0.8;
-const INTRO_SECONDS = 3.9;
+const CHARGE = LEAD + 0.7;
+const INTRO_SECONDS = 4.1;
 const intro = {
   burst: (t: number) =>
     t < CHARGE ? 0.06 * smooth(clamp01((t - LEAD) / (CHARGE - LEAD))) : 0.06 + 0.94 * (1 - Math.pow(2, -10 * clamp01((t - CHARGE) / 1.6))),
@@ -399,15 +399,23 @@ function Rig({ selection, reduced, shift, lift, labels, glow, clockRef, viewRef,
   const scratch = useRef(new THREE.Vector3());
   const smoothView = useRef<View>({ zoom: 1, yaw: 0, pitch: 0 });
   const started = useRef(false);
+  const frameCount = useRef(0);
   const target = useRef(new THREE.Vector3());
 
   useFrame((state, dt) => {
     const camera = state.camera as THREE.PerspectiveCamera;
+    // The first frame compiles the shaders and can stall for a while. The opening starts on the second
+    // frame, so that stall is not counted and the interface entrance stays in step with the scene.
+    frameCount.current += 1;
+    if (frameCount.current < 2) return;
     if (!started.current) {
       started.current = true;
       onReady?.();
     }
     clockRef.current += Math.min(dt, 1 / 12);
+    // Expose the phase of the opening on <html>, for styling and for tests.
+    const phase = reduced || clockRef.current > CHARGE + 1.6 ? "settled" : clockRef.current > CHARGE ? "burst" : clockRef.current > LEAD ? "core" : "lead";
+    if (!ambient && document.documentElement.dataset.scene !== phase) document.documentElement.dataset.scene = phase;
     const t = clockRef.current;
     const burst = reduced ? 1 : intro.burst(t);
     const labelFade = reduced ? 1 : intro.labels(t);

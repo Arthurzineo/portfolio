@@ -78,6 +78,30 @@ export default function SynapseApp() {
   // The decorative layers need a pointer-capable, motion-tolerant, roomy screen.
   const [lite, setLite] = useState(false);
   const effects = sceneOnFor(mode, webgl) && !reduced && !compact && !lite;
+  // The typographic name stays visible until the ASCII rendering has actually drawn, then they swap.
+  // Without this the name was simply missing while that canvas loaded.
+  const asciiHost = useRef<HTMLDivElement>(null);
+  const [asciiReady, setAsciiReady] = useState(false);
+  useEffect(() => {
+    const host = asciiHost.current;
+    if (!effects || !host) return;
+    let timer = 0;
+    const check = () => {
+      if (!host.querySelector("canvas, pre")) return false;
+      timer = window.setTimeout(() => setAsciiReady(true), 500);
+      return true;
+    };
+    if (check()) return () => window.clearTimeout(timer);
+    const observer = new MutationObserver(() => {
+      if (check()) observer.disconnect();
+    });
+    observer.observe(host, { childList: true, subtree: true });
+    return () => {
+      observer.disconnect();
+      window.clearTimeout(timer);
+      setAsciiReady(false);
+    };
+  }, [effects]);
   // Fetch the curtain ahead of time so the first mode switch is not an empty frame.
   useEffect(() => {
     void import("@/components/reactbits/LetterGlitch");
@@ -229,9 +253,9 @@ export default function SynapseApp() {
               </div>
             )}
             <div>
-              <h1 data-ascii={effects}>{profile.name}</h1>
+              <h1 data-ascii={effects && asciiReady}>{profile.name}</h1>
               {effects ? (
-                <div className="hero-ascii" aria-hidden="true">
+                <div className="hero-ascii" aria-hidden="true" ref={asciiHost} data-ready={asciiReady}>
                   <Suspense fallback={null}>
                     <ASCIIText
                       text={profile.name}
