@@ -100,7 +100,7 @@ html[data-mode="neural"] .focus-root {
    One ordered opening instead of pieces popping in as they load. Everything below is paused in its starting
    state while html[data-boot="wait"], and runs when the scene draws its first frame (data-boot="ready"):
    0.0s background · 0.2s top bar, left to right · 0.5s portrait card · 0.7s name · 0.85s role · 0.95s intro ·
-   1.0s the core fades in · 1.05s buttons, one by one · 1.7s the core bursts · 3.2s node names (driven by the scene).
+   1.05s buttons, one by one · 1.8s the core fades in · 2.5s the core bursts · 4.0s node names (driven by the scene).
    Without JavaScript there is no data-boot, so nothing is animated or hidden. */
 html[data-boot] .topbar > *,
 html[data-boot] .hero > img,
