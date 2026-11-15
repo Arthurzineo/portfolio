@@ -99,8 +99,8 @@ html[data-mode="neural"] .focus-root {
 /* ------------------------------------------------------------------ entrance sequence
    One ordered opening instead of pieces popping in as they load. Everything below is paused in its starting
    state while html[data-boot="wait"], and runs when the scene draws its first frame (data-boot="ready"):
-   0.0s background · 0.2s top bar, left to right · 0.5s the core fades in · 1.2s it bursts · 1.3s portrait card ·
-   1.6s name · 1.8s role · 1.95s intro · 2.1s buttons, one by one · 2.7s node names (driven by the scene).
+   0.0s background · 0.2s top bar, left to right · 0.5s portrait card · 0.7s name and the core fading in ·
+   0.85s role · 0.95s intro · 1.05s buttons, one by one · 1.5s the core bursts · 3.0s node names (driven by the scene).
    Without JavaScript there is no data-boot, so nothing is animated or hidden. */
 html[data-boot] .topbar > *,
 html[data-boot] .hero > img,
@@ -148,31 +148,31 @@ html[data-boot] .hero > img,
 html[data-boot] .hero-card {
   animation-name: card-in;
   animation-duration: 1000ms;
-  animation-delay: 1300ms;
+  animation-delay: 500ms;
 }
 html[data-boot] .hero h1,
 html[data-boot] .hero-ascii {
   animation-name: wipe-in;
   animation-duration: 1000ms;
-  animation-delay: 1600ms;
+  animation-delay: 700ms;
 }
 html[data-boot] .hero-role {
-  animation-delay: 1800ms;
+  animation-delay: 850ms;
 }
 html[data-boot] .hero-intro {
-  animation-delay: 1950ms;
+  animation-delay: 950ms;
 }
 html[data-boot] .hero-actions > :nth-child(1) {
-  animation-delay: 2100ms;
+  animation-delay: 1050ms;
 }
 html[data-boot] .hero-actions > :nth-child(2) {
-  animation-delay: 2200ms;
+  animation-delay: 1150ms;
 }
 html[data-boot] .hero-actions > :nth-child(3) {
-  animation-delay: 2300ms;
+  animation-delay: 1250ms;
 }
 html[data-boot] .area-list > * {
-  animation-delay: 2400ms;
+  animation-delay: 1350ms;
 }
 @keyframes rise-in {
   from {

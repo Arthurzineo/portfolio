@@ -48,17 +48,17 @@ const clamp01 = (t: number) => Math.min(1, Math.max(0, t));
 
 /**
  * Opening sequence ("Neural Awakening"), in seconds from the first frame:
- * 0.0-0.5 empty, while the top bar starts to enter;
- * 0.5-1.2 the core fades in as one packed, bright mass;
- * 1.2-2.8 it bursts outward to the authored positions, with a flash and a shockwave;
- * 1.4-3.3 neurons unfold and the connections trace out; 2.7-3.5 names fade in, once everything has settled.
+ * 0.0-0.7 empty, while the top bar, the portrait and the name enter;
+ * 0.7-1.5 the core fades in as one packed, bright mass;
+ * 1.5-3.1 it bursts outward to the authored positions, with a flash and a shockwave;
+ * 1.7-3.6 neurons unfold and the connections trace out; 3.0-3.8 names fade in, once everything has settled.
  * The whole graph scales uniformly from the origin, so filaments stay attached to their nodes throughout.
  */
 /** Nothing is drawn for this long, so the interface has started to appear before the core does. */
-const LEAD = 0.5;
+const LEAD = 0.7;
 /** The burst happens at this time. Before it, the core fades in and charges. */
-const CHARGE = LEAD + 0.7;
-const INTRO_SECONDS = 3.6;
+const CHARGE = LEAD + 0.8;
+const INTRO_SECONDS = 3.9;
 const intro = {
   burst: (t: number) =>
     t < CHARGE ? 0.06 * smooth(clamp01((t - LEAD) / (CHARGE - LEAD))) : 0.06 + 0.94 * (1 - Math.pow(2, -10 * clamp01((t - CHARGE) / 1.6))),
